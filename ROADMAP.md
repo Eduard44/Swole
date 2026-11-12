@@ -3,7 +3,7 @@
 The build order from [CLAUDE.md](CLAUDE.md). One step at a time, each one checkable on the live link.
 
 - [x] 1. Repo setup: project scaffold, theme tokens, light and dark, deploy to Pages
-- [ ] 2. Body map: figures, tap to select, front/back and male/female toggle
+- [x] 2. Body map: figures, tap to select, front/back and male/female toggle (first-draft figures, to refine with the owner)
 - [ ] 3. Exercise library: import dataset, list, search, filter
 - [ ] 4. Session logging and rest timer
 - [ ] 5. History
@@ -13,7 +13,6 @@ The build order from [CLAUDE.md](CLAUDE.md). One step at a time, each one checka
 
 ## Waiting on the owner
 
-- Accent color and typeface. Step 1 uses a placeholder blue and the phone's own system font.
-- Exact muscle groups on the body map.
-- Recovery rule numbers (hours until a muscle counts as fresh).
-- Who drafts the body figures: the owner, or Claude as SVG first.
+- Feedback on the first-draft figures: muscle shapes, proportions, the female figure.
+- Recovery colors on the body map (proposal: shades of violet, since red means "selected"). Needed in step 6.
+- Recovery rule numbers (hours until a muscle counts as fresh). Needed in step 6.

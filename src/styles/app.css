@@ -1,0 +1,225 @@
+/* One phone-height screen: header, view switches, the body map, and one panel in thumb reach. */
+.shell {
+  height: 100%;
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: calc(var(--space-4) + env(safe-area-inset-top)) max(var(--space-4), env(safe-area-inset-right))
+    calc(var(--space-4) + env(safe-area-inset-bottom)) max(var(--space-4), env(safe-area-inset-left));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  position: relative;
+  z-index: 1;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.wordmark {
+  font-size: var(--text-xl);
+  font-weight: 900;
+  font-stretch: 151%;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.switches {
+  display: flex;
+  gap: var(--space-4);
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.segmented {
+  display: flex;
+  gap: var(--space-1);
+}
+
+/* Buttons. All are at least 48px tall for gym thumbs. */
+.btn {
+  min-height: var(--touch-target);
+  padding: 0 var(--space-4);
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-weight: 650;
+  cursor: pointer;
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-small {
+  font-size: var(--text-sm);
+  padding: 0 var(--space-3);
+}
+
+.btn-primary {
+  color: var(--on-accent);
+  font-weight: var(--weight-bold);
+  min-height: 52px;
+}
+
+.segment {
+  color: var(--text-muted);
+}
+
+.segment[aria-pressed='true'] {
+  color: var(--on-secondary);
+}
+
+.stage {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* The body map */
+.bodymap {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: manipulation;
+}
+
+.bodymap-art {
+  animation: fade-in var(--duration-base) var(--ease-out);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.bodymap-outline {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.1px;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.muscle {
+  cursor: pointer;
+  outline: none;
+}
+
+.muscle-fill {
+  fill: var(--muscle);
+  transition: fill var(--duration-base) var(--ease-out);
+}
+
+.muscle-line,
+.muscle-line2,
+.muscle-detail {
+  fill: none;
+  stroke: var(--ink);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  transition: stroke var(--duration-base) var(--ease-out);
+}
+
+.muscle-line {
+  stroke-width: 1.6px;
+}
+
+.muscle-line2 {
+  stroke-width: 0.9px;
+  opacity: 0.35;
+}
+
+.muscle-detail {
+  stroke-width: 1px;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* A wider invisible edge so small muscles are easier to tap. */
+.muscle-hit {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 7;
+  pointer-events: all;
+}
+
+.muscle.is-selected .muscle-fill {
+  fill: var(--mark);
+}
+
+.muscle.is-focus .muscle-line {
+  stroke: var(--mark);
+}
+
+.muscle:focus-visible .muscle-line {
+  stroke: var(--accent);
+  stroke-width: 2.8px;
+}
+
+.ring {
+  fill: none;
+  stroke: var(--mark);
+  stroke-linecap: round;
+  pointer-events: none;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset var(--duration-slow) var(--ease-in-out) var(--duration-fast);
+}
+
+.ring.is-on {
+  stroke-dashoffset: 0;
+}
+
+/* The panel under the map */
+.panel {
+  flex: none;
+  min-height: 9.5rem;
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.panel-title {
+  font-size: var(--text-xl);
+  font-weight: 800;
+  font-stretch: 112%;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.panel-note {
+  color: var(--text-muted);
+}
+
+.panel-actions {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.panel-actions .btn {
+  flex: 1 1 8rem;
+}
+
+.chips {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.chip {
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--on-secondary);
+}
