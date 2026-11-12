@@ -1,15 +1,25 @@
 /*
- * Theme tokens. Every color, space, radius, shadow and duration in the app
- * comes from here, so light and dark share one system.
+ * Theme tokens. Every color, space, radius and duration in the app comes from
+ * here, so light and dark share one system. Change the look here.
  *
- * Light is the primary design. Dark is its own theme, not an inversion.
- * The accent color and typeface are placeholders until the owner picks them
- * (see "Open questions" in CLAUDE.md): change --accent-* and --font-* only.
+ * Light is the primary design, with calm violet and lime.
+ * Dark is its own theme, with neon versions of the same two colors.
+ * Red pencil (--mark) means one thing only: a selected muscle.
  */
+
+/* Roboto Flex, bundled with the app (weight and width are both adjustable). */
+@font-face {
+  font-family: 'Roboto Flex';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 1000;
+  font-stretch: 25% 151%;
+  src: url('@fontsource-variable/roboto-flex/files/roboto-flex-latin-wdth-normal.woff2') format('woff2-variations');
+}
 
 :root {
   /* Type */
-  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  --font-sans: 'Roboto Flex', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-numeric: var(--font-sans);
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
@@ -46,61 +56,53 @@
   --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-in-out: cubic-bezier(0.45, 0, 0.25, 1);
 
-  /* Light theme (default) */
+  /* Light theme (default): calm violet and lime on pale paper */
   color-scheme: light;
-  --bg: #f6f6f3;
-  --surface: #ffffff;
-  --surface-sunken: #eeeeea;
-  --text: #17181a;
-  --text-muted: #6b6e75;
-  --border: #e3e3de;
-  --accent: #2f6bff;
-  --accent-soft: #e4ecff;
+  --bg: #f6f5f8;
+  --surface: #fdfcfe;
+  --ink: #19171f;
+  --text: var(--ink);
+  --text-muted: #6d6a78;
+  --accent: #6a45f0;
   --on-accent: #ffffff;
-  --state-fresh: #3fae7a;
-  --state-recovering: #e5a83b;
-  --state-trained: #e2685c;
-  --shadow-sm: 0 1px 2px rgb(23 24 26 / 0.05), 0 2px 6px rgb(23 24 26 / 0.04);
-  --shadow-md: 0 2px 4px rgb(23 24 26 / 0.04), 0 10px 28px rgb(23 24 26 / 0.08);
+  --secondary: #d3f26a;
+  --on-secondary: #33400a;
+  --muscle: #dcdae2;
+  --mark: #d8443a;
+  --grain: 0.2;
 }
 
-/* Dark values, used in two places below. */
+/* Dark theme: neon violet and lime on near-black. The same values are listed
+   twice below: once for a chosen dark theme, once for "follow the device". */
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #121314;
-  --surface: #1b1d1f;
-  --surface-sunken: #0d0e0f;
-  --text: #f1f1ee;
-  --text-muted: #9a9da4;
-  --border: #2a2c30;
-  --accent: #6b95ff;
-  --accent-soft: #1d2740;
-  --on-accent: #0b1020;
-  --state-fresh: #56c491;
-  --state-recovering: #ecb955;
-  --state-trained: #ee8177;
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
-  --shadow-md: 0 2px 4px rgb(0 0 0 / 0.3), 0 12px 32px rgb(0 0 0 / 0.45);
+  --bg: #0d0b14;
+  --surface: #17141f;
+  --ink: #f5f1ff;
+  --text-muted: #a29ab8;
+  --accent: #b14dff;
+  --on-accent: #12032b;
+  --secondary: #ccff33;
+  --on-secondary: #1e2900;
+  --muscle: #34323c;
+  --mark: #ff5c4d;
+  --grain: 0.28;
 }
 
-/* "System" setting: follow the device unless a theme was chosen. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --bg: #121314;
-    --surface: #1b1d1f;
-    --surface-sunken: #0d0e0f;
-    --text: #f1f1ee;
-    --text-muted: #9a9da4;
-    --border: #2a2c30;
-    --accent: #6b95ff;
-    --accent-soft: #1d2740;
-    --on-accent: #0b1020;
-    --state-fresh: #56c491;
-    --state-recovering: #ecb955;
-    --state-trained: #ee8177;
-    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
-    --shadow-md: 0 2px 4px rgb(0 0 0 / 0.3), 0 12px 32px rgb(0 0 0 / 0.45);
+    --bg: #0d0b14;
+    --surface: #17141f;
+    --ink: #f5f1ff;
+    --text-muted: #a29ab8;
+    --accent: #b14dff;
+    --on-accent: #12032b;
+    --secondary: #ccff33;
+    --on-secondary: #1e2900;
+    --muscle: #34323c;
+    --mark: #ff5c4d;
+    --grain: 0.28;
   }
 }
 
