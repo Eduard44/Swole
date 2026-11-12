@@ -23,6 +23,7 @@
   font-size: var(--text-xl);
   font-weight: 900;
   font-stretch: 151%;
+  font-variation-settings: 'wdth' 151;
   letter-spacing: -0.01em;
   line-height: 1;
 }
@@ -99,12 +100,26 @@
   }
 }
 
-.bodymap-outline {
+/* The body: one filled figure with a strong pen outline. */
+.body-fill {
+  fill: var(--body);
+  transition: fill var(--duration-base) var(--ease-out);
+}
+
+.body-ink,
+.muscle-ink {
+  fill: var(--ink);
+  pointer-events: none;
+  transition: fill var(--duration-base) var(--ease-out);
+}
+
+.body-sketch,
+.muscle-sketch {
   fill: none;
   stroke: var(--ink);
-  stroke-width: 1.1px;
+  stroke-width: 0.7px;
   vector-effect: non-scaling-stroke;
-  opacity: 0.4;
+  opacity: 0.18;
   pointer-events: none;
 }
 
@@ -118,51 +133,27 @@
   transition: fill var(--duration-base) var(--ease-out);
 }
 
-.muscle-line,
-.muscle-line2,
+/* The lines between muscles are finer than the body outline. */
+.muscle-ink {
+  opacity: 0.85;
+}
+
 .muscle-detail {
   fill: none;
   stroke: var(--ink);
-  stroke-linejoin: round;
+  stroke-width: 0.5;
   stroke-linecap: round;
-  vector-effect: non-scaling-stroke;
-  transition: stroke var(--duration-base) var(--ease-out);
-}
-
-.muscle-line {
-  stroke-width: 1.6px;
-}
-
-.muscle-line2 {
-  stroke-width: 0.9px;
-  opacity: 0.35;
-}
-
-.muscle-detail {
-  stroke-width: 1px;
-  opacity: 0.45;
+  stroke-linejoin: round;
+  opacity: 0.6;
   pointer-events: none;
-}
-
-/* A wider invisible edge so small muscles are easier to tap. */
-.muscle-hit {
-  fill: transparent;
-  stroke: transparent;
-  stroke-width: 7;
-  pointer-events: all;
 }
 
 .muscle.is-selected .muscle-fill {
   fill: var(--mark);
 }
 
-.muscle.is-focus .muscle-line {
-  stroke: var(--mark);
-}
-
-.muscle:focus-visible .muscle-line {
-  stroke: var(--accent);
-  stroke-width: 2.8px;
+.muscle:focus-visible .muscle-ink {
+  fill: var(--accent);
 }
 
 .ring {

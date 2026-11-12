@@ -106,3 +106,106 @@ export function boundsOf(points: readonly Point[]): Box {
   }
   return { x: x0, y: y0, width: x1 - x0, height: y1 - y0 }
 }
+
+/* ---------- Pen drawing: lines that pass through their points, with a varying weight ---------- */
+
+const spline = (p0: Point, p1: Point, p2: Point, p3: Point, t: number): Point => {
+  const t2 = t * t
+  const t3 = t2 * t
+  const axis = (k: 0 | 1) =>
+    0.5 *
+    (2 * p1[k] +
+      (-p0[k] + p2[k]) * t +
+      (2 * p0[k] - 5 * p1[k] + 4 * p2[k] - p3[k]) * t2 +
+      (-p0[k] + 3 * p1[k] - 3 * p2[k] + p3[k]) * t3)
+  return [axis(0), axis(1)]
+}
+
+/** Many points along a smooth closed curve that passes through every given point. */
+export function sampleClosed(points: readonly Point[], perSegment = 8): Point[] {
+  const n = points.length
+  const out: Point[] = []
+  for (let i = 0; i < n; i++) {
+    const p0 = points[(i - 1 + n) % n]
+    const p1 = points[i]
+    const p2 = points[(i + 1) % n]
+    const p3 = points[(i + 2) % n]
+    for (let s = 0; s < perSegment; s++) out.push(spline(p0, p1, p2, p3, s / perSegment))
+  }
+  return out
+}
+
+/** Many points along a smooth open curve that passes through every given point. */
+export function sampleOpen(points: readonly Point[], perSegment = 8): Point[] {
+  const n = points.length
+  const out: Point[] = []
+  for (let i = 0; i < n - 1; i++) {
+    const p0 = points[Math.max(0, i - 1)]
+    const p1 = points[i]
+    const p2 = points[i + 1]
+    const p3 = points[Math.min(n - 1, i + 2)]
+    for (let s = 0; s < perSegment; s++) out.push(spline(p0, p1, p2, p3, s / perSegment))
+  }
+  out.push(points[n - 1])
+  return out
+}
+
+/** Path text for a run of points joined by straight steps (smooth when the points are close). */
+export function polyPath(samples: readonly Point[], closed: boolean): string {
+  let d = ''
+  samples.forEach(([x, y], i) => {
+    d += `${i ? 'L' : 'M'}${x.toFixed(2)} ${y.toFixed(2)}`
+  })
+  return closed ? `${d}Z` : d
+}
+
+export type PenShape = {
+  /** The inside of the shape, for filling and tapping. */
+  fill: string
+  /** The pen outline itself, as a filled ribbon that is heavier on the shadow side. */
+  ink: string
+}
+
+/** The shadow falls down and to the right, so lines are heavier there. */
+const SHADOW: Point = [0.6, 0.8]
+
+/**
+ * A closed shape drawn the way a pen draws it: the line swells on the shadow
+ * side and thins on the lit side, with a little unevenness along the way.
+ */
+export function penShape(points: readonly Point[], seed: number, weight = 0.9, amp = 0.7): PenShape {
+  const samples = sampleClosed(jitter(points, seed, amp))
+  const n = samples.length
+  let area = 0
+  for (let i = 0; i < n; i++) {
+    const [x1, y1] = samples[i]
+    const [x2, y2] = samples[(i + 1) % n]
+    area += x1 * y2 - x2 * y1
+  }
+  const outward = area > 0 ? 1 : -1
+  const rand = makeRandom(seed + 77)
+  const phase = rand() * 6.28
+  const speed = 0.25 + rand() * 0.2
+  const outer: Point[] = []
+  const inner: Point[] = []
+  for (let i = 0; i < n; i++) {
+    const prev = samples[(i - 1 + n) % n]
+    const next = samples[(i + 1) % n]
+    const tx = next[0] - prev[0]
+    const ty = next[1] - prev[1]
+    const len = Math.hypot(tx, ty) || 1
+    const nx = (ty / len) * outward
+    const ny = (-tx / len) * outward
+    const facing = Math.max(0, nx * SHADOW[0] + ny * SHADOW[1])
+    const uneven = 1 + 0.22 * Math.sin(i * speed + phase)
+    const half = (weight * (0.5 + 1.15 * facing) * uneven) / 2
+    outer.push([samples[i][0] + nx * half, samples[i][1] + ny * half])
+    inner.push([samples[i][0] - nx * half, samples[i][1] - ny * half])
+  }
+  return { fill: polyPath(samples, true), ink: polyPath(outer, true) + polyPath(inner.reverse(), true) }
+}
+
+/** A pen line through the given points (for the small lines inside a muscle). */
+export function penLine(points: readonly Point[], seed: number, amp = 0.6): string {
+  return polyPath(sampleOpen(jitter(points, seed, amp)), false)
+}

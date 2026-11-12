@@ -4,9 +4,9 @@ import type { MuscleId } from './muscles'
 /**
  * The figure drawings, as lists of points on a 200 x 400 sheet (centre line x = 100).
  * Each shape is drawn for the left half only; "mirror" copies it to the right half.
- * The drawing code (BodyMap) turns these points into wobbly pencil shapes.
- *
- * These are first-draft figures. To reshape a muscle, move its points here.
+ * The drawing code (BodyMap) inks these points as pen shapes that pass through
+ * every point, so moving a point moves the line. "details" are the small pen
+ * lines inside a muscle.
  */
 
 export type View = 'front' | 'back'
@@ -17,7 +17,7 @@ type MuscleDrawing = {
   /** Copy each shape to the other side of the body. */
   mirror?: boolean
   shapes: Point[][]
-  /** Faint inner pencil lines (for example the lines across the abs). */
+  /** Small pen lines inside the muscle (for example the lines across the abs). */
   details?: Point[][]
 }
 
@@ -36,52 +36,106 @@ const HEAD: Point[] = [
   [100, 14], [110, 18], [115, 30], [113, 43], [107, 52], [100, 55], [93, 52], [87, 43], [85, 30], [90, 18],
 ]
 
-const FOREARM: Point[] = [[41, 152], [53, 151], [52, 172], [47, 198], [38, 200], [35, 178], [37, 162]]
-const SIDE_DELT: Point[] = [[49, 82], [57, 77], [57, 90], [55, 102], [48, 104], [46, 92]]
+/*
+ * The muscles are drawn generously so that neighbours meet and the outer ones
+ * run past the body outline. BodyMap trims them to the outline, so the figure
+ * reads as one body with muscle lines inside it, not as separate pieces.
+ */
+
+const SIDE_DELT: Point[] = [[58, 76], [52, 74], [44, 78], [40, 88], [40, 100], [44, 108], [50, 108], [54, 100], [57, 90]]
+const UPPER_ARM: Point[] = [
+  [44, 106], [52, 104], [60, 105], [64, 110], [62, 122], [59, 136], [55, 148], [46, 150], [38, 146], [38, 130], [40, 116],
+]
+const FOREARM: Point[] = [
+  [40, 151], [48, 149], [56, 151], [55, 164], [52, 180], [48, 196], [46, 206], [36, 206], [30, 204], [31, 188], [34, 170], [37, 158],
+]
 
 const FRONT: MuscleDrawing[] = [
-  { id: 'neck', shapes: [[[93, 56], [107, 56], [109, 66], [100, 71], [91, 66]]] },
-  { id: 'traps', mirror: true, shapes: [[[90, 62], [89, 69], [76, 73], [64, 74], [78, 67]]] },
+  { id: 'neck', shapes: [[[88, 52], [112, 52], [112, 64], [105, 70], [100, 72], [95, 70], [88, 64]]] },
+  { id: 'traps', mirror: true, shapes: [[[92, 60], [91, 68], [84, 73], [72, 76], [60, 77], [56, 72], [70, 68], [80, 66]]] },
   { id: 'side-delts', mirror: true, shapes: [SIDE_DELT] },
-  { id: 'front-delts', mirror: true, shapes: [[[62, 77], [73, 76], [74, 88], [69, 98], [62, 97], [59, 88]]] },
-  { id: 'chest', mirror: true, shapes: [[[76, 78], [98, 80], [98, 104], [90, 111], [78, 110], [71, 102], [72, 88]]] },
-  { id: 'biceps', mirror: true, shapes: [[[47, 107], [58, 104], [61, 120], [59, 138], [52, 146], [44, 140], [43, 122]]] },
+  { id: 'front-delts', mirror: true, shapes: [[[58, 77], [66, 76], [74, 78], [76, 86], [74, 95], [68, 102], [62, 104], [56, 100], [57, 90]]] },
+  { id: 'chest', mirror: true, shapes: [[[99, 79], [88, 77], [77, 78], [75, 86], [72, 95], [70, 103], [75, 109], [84, 112], [93, 111], [99, 107]]] },
+  { id: 'biceps', mirror: true, shapes: [UPPER_ARM] },
   { id: 'forearms', mirror: true, shapes: [FOREARM] },
   {
+    id: 'obliques',
+    mirror: true,
+    shapes: [[
+      [70, 106], [76, 111], [85, 114], [85, 130], [85, 150], [86, 166], [89, 180], [92, 190], [80, 190], [68, 188],
+      [64, 178], [66, 160], [64, 140], [62, 120], [63, 108],
+    ]],
+  },
+  {
     id: 'abs',
-    shapes: [[[88, 113], [112, 113], [114, 140], [112, 166], [106, 184], [100, 190], [94, 184], [88, 166], [86, 140]]],
+    shapes: [[
+      [88, 113], [100, 114], [112, 113], [114, 125], [114, 145], [113, 162], [110, 176], [105, 186], [100, 191],
+      [95, 186], [90, 176], [87, 162], [86, 145], [86, 125],
+    ]],
     details: [
-      [[100, 117], [100, 150], [100, 185]],
-      [[89, 131], [100, 133], [111, 131]],
-      [[89, 149], [100, 151], [111, 149]],
-      [[90, 167], [100, 169], [110, 167]],
+      [[100, 117], [100, 150], [100, 186]],
+      [[88, 129], [100, 131], [112, 129]],
+      [[88, 146], [100, 148], [112, 146]],
+      [[89, 163], [100, 165], [111, 163]],
     ],
   },
-  { id: 'obliques', mirror: true, shapes: [[[72, 113], [84, 115], [84, 150], [86, 172], [90, 185], [78, 181], [70, 164], [68, 138]]] },
-  { id: 'quads', mirror: true, shapes: [[[68, 197], [82, 193], [96, 211], [95, 240], [91, 268], [80, 272], [71, 262], [66, 230]]] },
-  { id: 'calves', mirror: true, shapes: [[[73, 290], [88, 290], [90, 315], [87, 345], [80, 356], [75, 345], [71, 315]]] },
+  {
+    id: 'quads',
+    mirror: true,
+    shapes: [[
+      [63, 196], [72, 192], [84, 192], [94, 200], [98, 214], [97, 232], [95, 250], [92, 264], [88, 274], [80, 277],
+      [72, 275], [66, 262], [62, 240], [61, 218],
+    ]],
+    details: [[[76, 196], [81, 232], [83, 270]]],
+  },
+  {
+    id: 'calves',
+    mirror: true,
+    shapes: [[[69, 290], [80, 288], [91, 290], [93, 304], [93, 322], [91, 340], [89, 356], [78, 358], [74, 350], [70, 330], [68, 310]]],
+  },
 ]
 
 const BACK: MuscleDrawing[] = [
-  { id: 'neck', shapes: [[[93, 55], [107, 55], [108, 63], [100, 66], [92, 63]]] },
+  { id: 'neck', shapes: [[[88, 52], [112, 52], [112, 62], [106, 66], [100, 67], [94, 66], [88, 62]]] },
+  { id: 'side-delts', mirror: true, shapes: [SIDE_DELT] },
+  { id: 'rear-delts', mirror: true, shapes: [[[58, 77], [66, 78], [73, 82], [76, 89], [73, 97], [67, 103], [61, 105], [56, 100], [57, 90]]] },
+  { id: 'triceps', mirror: true, shapes: [UPPER_ARM] },
+  { id: 'forearms', mirror: true, shapes: [FOREARM] },
+  {
+    id: 'lats',
+    mirror: true,
+    shapes: [[[64, 104], [70, 99], [79, 95], [87, 103], [92, 116], [96, 132], [96, 150], [91, 158], [82, 160], [73, 156], [66, 146], [63, 130], [62, 114]]],
+  },
   {
     id: 'traps',
-    shapes: [[[100, 64], [108, 67], [124, 72], [136, 76], [120, 84], [108, 104], [100, 124], [92, 104], [80, 84], [64, 76], [76, 72], [92, 67]]],
-    details: [[[100, 68], [100, 95], [100, 120]]],
+    shapes: [[
+      [100, 60], [108, 64], [118, 67], [130, 71], [142, 75], [132, 81], [120, 86], [111, 99], [105, 113], [100, 128],
+      [95, 113], [89, 99], [80, 86], [68, 81], [58, 75], [70, 71], [82, 67], [92, 64],
+    ]],
+    details: [[[100, 64], [100, 96], [100, 124]]],
   },
-  { id: 'side-delts', mirror: true, shapes: [SIDE_DELT] },
-  { id: 'rear-delts', mirror: true, shapes: [[[59, 79], [70, 81], [73, 92], [67, 100], [59, 98], [56, 88]]] },
-  { id: 'triceps', mirror: true, shapes: [[[46, 108], [58, 105], [61, 122], [58, 140], [51, 147], [44, 140], [42, 122]]] },
-  { id: 'forearms', mirror: true, shapes: [FOREARM] },
-  { id: 'lats', mirror: true, shapes: [[[66, 102], [78, 93], [88, 106], [93, 128], [93, 150], [84, 158], [74, 150], [68, 128]]] },
+  { id: 'obliques', mirror: true, shapes: [[[66, 150], [74, 157], [82, 162], [83, 176], [85, 188], [76, 190], [66, 188], [64, 176], [66, 162]]] },
   {
     id: 'lower-back',
-    shapes: [[[90, 155], [110, 155], [114, 170], [110, 186], [100, 190], [90, 186], [86, 170]]],
-    details: [[[100, 158], [100, 172], [100, 187]]],
+    shapes: [[[86, 152], [100, 150], [114, 152], [117, 166], [116, 180], [110, 190], [100, 193], [90, 190], [84, 180], [83, 166]]],
+    details: [[[100, 154], [100, 172], [100, 190]]],
   },
-  { id: 'glutes', mirror: true, shapes: [[[68, 193], [84, 189], [98, 195], [98, 214], [90, 224], [76, 224], [66, 212]]] },
-  { id: 'hamstrings', mirror: true, shapes: [[[68, 231], [80, 229], [94, 231], [93, 254], [89, 272], [78, 274], [70, 262]]] },
-  { id: 'calves', mirror: true, shapes: [[[71, 287], [80, 283], [90, 287], [92, 308], [88, 334], [81, 346], [75, 334], [70, 308]]] },
+  { id: 'glutes', mirror: true, shapes: [[[64, 196], [72, 190], [86, 190], [97, 194], [99, 206], [99, 218], [94, 226], [84, 229], [72, 227], [64, 220], [62, 208]]] },
+  {
+    id: 'hamstrings',
+    mirror: true,
+    shapes: [[[64, 232], [74, 230], [88, 230], [96, 233], [96, 248], [94, 262], [90, 274], [82, 278], [73, 276], [66, 264], [62, 246]]],
+    details: [[[80, 233], [81, 254], [80, 274]]],
+  },
+  {
+    id: 'calves',
+    mirror: true,
+    shapes: [[
+      [69, 288], [78, 283], [86, 283], [93, 288], [95, 302], [94, 318], [90, 334], [86, 346], [80, 350], [75, 344],
+      [70, 328], [67, 310], [67, 296],
+    ]],
+    details: [[[81, 286], [81, 312], [81, 344]]],
+  },
 ]
 
 const mirrorPoint = ([x, y]: Point): Point => [CENTER_X * 2 - x, y]
@@ -127,7 +181,9 @@ export function buildFigure(view: View, kind: FigureKind): Figure {
       shapes: drawing.shapes
         .flatMap((shape) => (drawing.mirror ? [shape, shape.map(mirrorPoint)] : [shape]))
         .map((shape) => reshape(kind, shape)),
-      details: (drawing.details ?? []).map((line) => reshape(kind, line)),
+      details: (drawing.details ?? [])
+        .flatMap((line) => (drawing.mirror ? [line, line.map(mirrorPoint)] : [line]))
+        .map((line) => reshape(kind, line)),
     })),
   }
 }

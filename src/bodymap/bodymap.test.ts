@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { closedShape, hashString, makeRandom } from '../drawn/paths'
+import { closedShape, hashString, makeRandom, penShape, sampleClosed } from '../drawn/paths'
 import { buildFigure, musclesInView, widthScale, CENTER_X } from './figures'
 import { MUSCLES } from './muscles'
 import { EMPTY_SELECTION, tapMuscle, unselectMuscle, zoomOut } from './selection'
@@ -24,6 +24,22 @@ describe('hand-drawn paths', () => {
   })
 })
 
+describe('pen drawing', () => {
+  const square = [[0, 0], [10, 0], [10, 10], [0, 10]] as const
+
+  it('draws a curve that passes through every given point', () => {
+    const samples = sampleClosed(square, 4)
+    for (const [x, y] of square) {
+      expect(samples.some(([sx, sy]) => Math.abs(sx - x) < 1e-9 && Math.abs(sy - y) < 1e-9)).toBe(true)
+    }
+  })
+
+  it('inks the same shape the same way every time', () => {
+    expect(penShape(square, 9)).toEqual(penShape(square, 9))
+    expect(penShape(square, 9).ink).not.toBe(penShape(square, 10).ink)
+  })
+})
+
 describe('figures', () => {
   it('shows every one of the 17 muscle groups on the front or the back', () => {
     const drawn = new Set([...musclesInView('front'), ...musclesInView('back')])
@@ -31,7 +47,7 @@ describe('figures', () => {
     for (const muscle of MUSCLES) expect(drawn.has(muscle.id)).toBe(true)
   })
 
-  it('keeps every figure inside the sheet', () => {
+  it('keeps every figure on the sheet', () => {
     for (const view of ['front', 'back'] as const) {
       for (const kind of ['male', 'female'] as const) {
         const figure = buildFigure(view, kind)
@@ -51,6 +67,7 @@ describe('figures', () => {
     expect(chest.shapes).toHaveLength(2)
     const [left, right] = chest.shapes
     expect(right[0][0]).toBeCloseTo(CENTER_X * 2 - left[0][0])
+    expect(chest.details.length % 2).toBe(0)
   })
 
   it('gives the female figure narrower shoulders and wider hips', () => {
