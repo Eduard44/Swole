@@ -209,28 +209,3 @@ export function penShape(points: readonly Point[], seed: number, weight = 0.9, a
 export function penLine(points: readonly Point[], seed: number, amp = 0.6): string {
   return polyPath(sampleOpen(jitter(points, seed, amp)), false)
 }
-
-/**
- * Short hatching strokes for the shadow side of a shape. They are drawn across
- * the lower right of the shape's box; the caller clips them to the shape.
- */
-export function hatchLines(points: readonly Point[], seed: number, count = 5): string[] {
-  const box = boundsOf(points)
-  const size = Math.min(box.width, box.height)
-  const cx = box.x + box.width / 2
-  const cy = box.y + box.height / 2
-  const rand = makeRandom(seed + 31)
-  const lines: string[] = []
-  for (let i = 0; i < count; i++) {
-    const along = 0.12 + i * 0.1 + (rand() - 0.5) * 0.03
-    const mx = cx + SHADOW[0] * along * box.width
-    const my = cy + SHADOW[1] * along * box.height
-    const half = size * (0.42 - i * 0.03) * (0.85 + rand() * 0.3)
-    const x1 = mx + 0.72 * half
-    const y1 = my - 0.7 * half
-    const x2 = mx - 0.72 * half
-    const y2 = my + 0.7 * half
-    lines.push(`M${x1.toFixed(2)} ${y1.toFixed(2)}L${x2.toFixed(2)} ${y2.toFixed(2)}`)
-  }
-  return lines
-}

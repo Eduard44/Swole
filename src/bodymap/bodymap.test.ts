@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { closedShape, hashString, hatchLines, makeRandom, penShape, sampleClosed } from '../drawn/paths'
+import { closedShape, hashString, makeRandom, penShape, sampleClosed } from '../drawn/paths'
 import { buildFigure, musclesInView, widthScale, CENTER_X } from './figures'
 import { MUSCLES } from './muscles'
 import { EMPTY_SELECTION, tapMuscle, unselectMuscle, zoomOut } from './selection'
@@ -38,10 +38,6 @@ describe('pen drawing', () => {
     expect(penShape(square, 9)).toEqual(penShape(square, 9))
     expect(penShape(square, 9).ink).not.toBe(penShape(square, 10).ink)
   })
-
-  it('returns the requested number of hatching strokes', () => {
-    expect(hatchLines(square, 3, 5)).toHaveLength(5)
-  })
 })
 
 describe('figures', () => {
@@ -51,7 +47,7 @@ describe('figures', () => {
     for (const muscle of MUSCLES) expect(drawn.has(muscle.id)).toBe(true)
   })
 
-  it('keeps every figure inside the sheet', () => {
+  it('keeps every figure on the sheet', () => {
     for (const view of ['front', 'back'] as const) {
       for (const kind of ['male', 'female'] as const) {
         const figure = buildFigure(view, kind)
