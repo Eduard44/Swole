@@ -6,6 +6,10 @@ No account, no ads, no analytics. All data stays on your device.
 
 **Live app:** https://eduard44.github.io/Swole/ (updates on every push to `main`)
 
+## How changes get in
+
+Each change is built on a side branch and opened as a pull request. GitHub runs the tests and the build on it and shows a green tick or a red cross. Pressing **Merge** puts the change on `main`, and the live app updates about half a minute later.
+
 ## Status
 
 Step 1 of 8 is done: project setup, theme tokens, light and dark themes, and automatic deploy. See [ROADMAP.md](ROADMAP.md) for what comes next and [CLAUDE.md](CLAUDE.md) for the full plan.
@@ -27,3 +31,4 @@ npm run build    # build the version that gets deployed
 - `src/theme/`: the light / dark / system switch.
 - `src/App.tsx`: the current screen (a placeholder that shows the theme).
 - `.github/workflows/deploy.yml`: builds and publishes the app to GitHub Pages.
+- `.github/workflows/check.yml`: runs the tests and the build on every pull request.
