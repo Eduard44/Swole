@@ -100,12 +100,26 @@
   }
 }
 
-.bodymap-outline {
+/* The body: one filled figure with a strong pen outline. */
+.body-fill {
+  fill: var(--body);
+  transition: fill var(--duration-base) var(--ease-out);
+}
+
+.body-ink,
+.muscle-ink {
+  fill: var(--ink);
+  pointer-events: none;
+  transition: fill var(--duration-base) var(--ease-out);
+}
+
+.body-sketch,
+.muscle-sketch {
   fill: none;
   stroke: var(--ink);
-  stroke-width: 1.1px;
+  stroke-width: 0.7px;
   vector-effect: non-scaling-stroke;
-  opacity: 0.4;
+  opacity: 0.18;
   pointer-events: none;
 }
 
@@ -116,62 +130,22 @@
 
 .muscle-fill {
   fill: var(--muscle);
-  filter: url(#swole-bodymap-grain);
   transition: fill var(--duration-base) var(--ease-out);
 }
 
-.bodymap.is-moving .muscle-fill {
-  filter: none;
-}
-
-/* The pen outline: a filled ribbon, heavier on the shadow side. */
-.muscle-ink,
-.bodymap-extra {
-  fill: var(--ink);
-  pointer-events: none;
-  transition: fill var(--duration-base) var(--ease-out);
-}
-
-.bodymap-extra {
-  opacity: 0.7;
-}
-
-/* A loose first pass under the ink, like a sketch. */
-.muscle-sketch {
-  fill: none;
-  stroke: var(--ink);
-  stroke-width: 0.7px;
-  vector-effect: non-scaling-stroke;
-  opacity: 0.22;
-  pointer-events: none;
-}
-
-.muscle-detail,
-.muscle-hatch path {
-  fill: none;
-  stroke: var(--ink);
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  pointer-events: none;
-  transition: stroke var(--duration-base) var(--ease-out);
+/* The lines between muscles are finer than the body outline. */
+.muscle-ink {
+  opacity: 0.85;
 }
 
 .muscle-detail {
-  stroke-width: 0.55;
-  opacity: 0.8;
-}
-
-.muscle-hatch path {
-  stroke-width: 0.4;
-  opacity: 0.55;
-}
-
-/* A wider invisible edge so small muscles are easier to tap. */
-.muscle-hit {
-  fill: transparent;
-  stroke: transparent;
-  stroke-width: 7;
-  pointer-events: all;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 0.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 .muscle.is-selected .muscle-fill {

@@ -67,7 +67,8 @@
   --on-accent: #ffffff;
   --secondary: #d3f26a;
   --on-secondary: #33400a;
-  --muscle: #dcdae2;
+  --body: #eeecf2;
+  --muscle: #d6d3de;
   --mark: #d8443a;
   --grain: 0.2;
 }
@@ -84,7 +85,8 @@
   --on-accent: #12032b;
   --secondary: #ccff33;
   --on-secondary: #1e2900;
-  --muscle: #34323c;
+  --body: #211e2a;
+  --muscle: #383446;
   --mark: #ff5c4d;
   --grain: 0.28;
 }
@@ -100,7 +102,8 @@
     --on-accent: #12032b;
     --secondary: #ccff33;
     --on-secondary: #1e2900;
-    --muscle: #34323c;
+    --body: #211e2a;
+    --muscle: #383446;
     --mark: #ff5c4d;
     --grain: 0.28;
   }
