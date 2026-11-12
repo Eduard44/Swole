@@ -1,4 +1,4 @@
-# Swole: master prompt (v02)
+# Swole: master prompt (v03)
 
 Read this first in every session. It is the source of truth for what Swole is, what is in scope, and how to build it. Change it only when the owner agrees, and bump the version.
 
@@ -43,7 +43,7 @@ Later (not v1, do not build yet):
 - **Themes:** light is the primary design; dark mode is a full second theme, not an inversion.
 - **Colors:** violet is the main color and lime the secondary. Light theme uses the calm versions; dark theme uses neon versions. Red pencil is reserved for one meaning only: a selected muscle. Unselected muscles are neutral grey.
 - **Type:** Roboto Flex for everything (wide and heavy for the wordmark, large clear numbers for weight and reps). Self-hosted inside the app, never loaded from the internet.
-- **Body map:** original figures made of hand-drawn muscle shapes, drawn as SVG with one named shape per muscle group so they can be tapped, tinted and animated. Male and female, front and back. The figures are drafted as SVG first; the owner reacts and refines.
+- **Body map:** original figures drawn like a manga pen sketch: muscle shapes inked with a line that is heavier on the shadow side, a little hatching, and a few lines inside each muscle. Sketchy, not highly detailed. Drawn as SVG with one named shape per muscle group so they can be tapped, tinted and animated. Male and female, front and back. The figures are drafted as SVG first; the owner reacts and refines.
 - **Muscle groups (17):** neck, traps, front delts, side delts, rear delts, chest, biceps, triceps, forearms, abs, obliques, lats, lower back, glutes, quads, hamstrings, calves.
 - **Motion:** calm and smooth. Soft easing, gentle fades and slides, no bounce, no confetti. Short durations (roughly 200 to 400 ms). Respect the reduced-motion setting.
 - Built for one-handed phone use in a gym: big touch targets, key actions in thumb reach, readable at a glance.

@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { PencilFilter } from '../drawn/Drawn'
-import { boundsOf, closedShape, hashString, openLine, ringPath, type Box } from '../drawn/paths'
+import { boundsOf, closedShape, hashString, hatchLines, penLine, penShape, ringPath, type Box } from '../drawn/paths'
 import { buildFigure, type FigureKind, type View } from './figures'
 import { muscleName, type MuscleId } from './muscles'
 import { FULL_VIEW, zoomTarget } from './zoom'
@@ -16,6 +16,7 @@ type Props = {
   onTapPaper: () => void
 }
 
+/** The grain filter for muscle fills. app.css refers to this id. */
 const GRAIN = 'swole-bodymap-grain'
 const ZOOM_MS = 380
 const boxText = (b: Box) => `${b.x.toFixed(2)} ${b.y.toFixed(2)} ${b.width.toFixed(2)} ${b.height.toFixed(2)}`
@@ -23,7 +24,7 @@ const easeInOut = (k: number) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k 
 const prefersReducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-/** The hand-drawn body. Tap a muscle to zoom in on it; it is ringed in red pencil. */
+/** The body, inked as a pen sketch. Tap a muscle to zoom in on it; it is ringed in red pencil. */
 export function BodyMap({ view, figure, selected, focus, onTapMuscle, onTapPaper }: Props) {
   const svgRef = useRef<SVGSVGElement>(null)
   const artRef = useRef<SVGGElement>(null)
@@ -40,8 +41,8 @@ export function BodyMap({ view, figure, selected, focus, onTapMuscle, onTapPaper
   )
   const target = useMemo(() => (focusShapes ? zoomTarget(focusShapes) : FULL_VIEW), [focusShapes])
 
-  // Move the view smoothly to the target. The grain is switched off while moving
-  // so the zoom stays smooth on phones, and comes back when it settles.
+  // Move the view smoothly to the target. The fill grain is switched off while
+  // moving so the zoom stays smooth on phones, and comes back when it settles.
   useLayoutEffect(() => {
     const svg = svgRef.current
     const art = artRef.current
@@ -57,7 +58,7 @@ export function BodyMap({ view, figure, selected, focus, onTapMuscle, onTapPaper
     }
     let frame = 0
     let start: number | null = null
-    art.removeAttribute('filter')
+    svg.classList.add('is-moving')
     const step = (now: number) => {
       if (start === null) start = now
       const k = Math.min(1, (now - start) / ZOOM_MS)
@@ -71,12 +72,12 @@ export function BodyMap({ view, figure, selected, focus, onTapMuscle, onTapPaper
       current.current = box
       svg.setAttribute('viewBox', boxText(box))
       if (k < 1) frame = requestAnimationFrame(step)
-      else art.setAttribute('filter', `url(#${GRAIN})`)
+      else svg.classList.remove('is-moving')
     }
     frame = requestAnimationFrame(step)
     return () => {
       cancelAnimationFrame(frame)
-      art.setAttribute('filter', `url(#${GRAIN})`)
+      svg.classList.remove('is-moving')
     }
   }, [target])
 
@@ -101,9 +102,12 @@ export function BodyMap({ view, figure, selected, focus, onTapMuscle, onTapPaper
       <defs>
         <PencilFilter id={GRAIN} seed={11} />
       </defs>
-      <g ref={artRef} key={key} className="bodymap-art" filter={`url(#${GRAIN})`}>
+      <g ref={artRef} key={key} className="bodymap-art">
         <path className="bodymap-outline" d={closedShape(drawing.outline, hashString(`${key}-outline`), 1.2)} />
         <path className="bodymap-outline" d={closedShape(drawing.head, hashString('head'), 1.2)} />
+        {drawing.extras.map((shape, i) => (
+          <path key={`x${i}`} className="bodymap-extra" d={penShape(shape, hashString(`extra-${i}`), 0.6).ink} />
+        ))}
         {drawing.muscles.map((muscle) => {
           const isSelected = selected.includes(muscle.id)
           const classes = ['muscle', isSelected && 'is-selected', focus === muscle.id && 'is-focus']
@@ -129,19 +133,29 @@ export function BodyMap({ view, figure, selected, focus, onTapMuscle, onTapPaper
               }}
             >
               {muscle.shapes.map((shape, i) => {
-                const seed = hashString(`${view}-${muscle.id}-${i}`)
-                const d = closedShape(shape, seed, 1.6)
+                const name = `${view}-${muscle.id}-${i}`
+                const seed = hashString(name)
+                const pen = penShape(shape, seed)
+                const clip = `clip-${figure}-${name}`
                 return (
                   <g key={i}>
-                    <path className="muscle-fill" d={d} />
-                    <path className="muscle-line" d={d} />
-                    <path className="muscle-line2" d={closedShape(shape, seed + 500, 2.4)} />
-                    <path className="muscle-hit" d={d} />
+                    <clipPath id={clip}>
+                      <path d={pen.fill} />
+                    </clipPath>
+                    <path className="muscle-fill" d={pen.fill} />
+                    <g className="muscle-hatch" clipPath={`url(#${clip})`}>
+                      {hatchLines(shape, seed).map((d, k) => (
+                        <path key={k} d={d} />
+                      ))}
+                    </g>
+                    <path className="muscle-sketch" d={closedShape(shape, seed + 500, 2)} />
+                    <path className="muscle-ink" d={pen.ink} />
+                    <path className="muscle-hit" d={pen.fill} />
                   </g>
                 )
               })}
               {muscle.details.map((line, i) => (
-                <path key={`d${i}`} className="muscle-detail" d={openLine(line, hashString(`${muscle.id}-d${i}`), 1)} />
+                <path key={`d${i}`} className="muscle-detail" d={penLine(line, hashString(`${muscle.id}-d${i}`))} />
               ))}
             </g>
           )

@@ -23,6 +23,7 @@
   font-size: var(--text-xl);
   font-weight: 900;
   font-stretch: 151%;
+  font-variation-settings: 'wdth' 151;
   letter-spacing: -0.01em;
   line-height: 1;
 }
@@ -115,33 +116,54 @@
 
 .muscle-fill {
   fill: var(--muscle);
+  filter: url(#swole-bodymap-grain);
   transition: fill var(--duration-base) var(--ease-out);
 }
 
-.muscle-line,
-.muscle-line2,
-.muscle-detail {
+.bodymap.is-moving .muscle-fill {
+  filter: none;
+}
+
+/* The pen outline: a filled ribbon, heavier on the shadow side. */
+.muscle-ink,
+.bodymap-extra {
+  fill: var(--ink);
+  pointer-events: none;
+  transition: fill var(--duration-base) var(--ease-out);
+}
+
+.bodymap-extra {
+  opacity: 0.7;
+}
+
+/* A loose first pass under the ink, like a sketch. */
+.muscle-sketch {
   fill: none;
   stroke: var(--ink);
-  stroke-linejoin: round;
-  stroke-linecap: round;
+  stroke-width: 0.7px;
   vector-effect: non-scaling-stroke;
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.muscle-detail,
+.muscle-hatch path {
+  fill: none;
+  stroke: var(--ink);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
   transition: stroke var(--duration-base) var(--ease-out);
 }
 
-.muscle-line {
-  stroke-width: 1.6px;
-}
-
-.muscle-line2 {
-  stroke-width: 0.9px;
-  opacity: 0.35;
-}
-
 .muscle-detail {
-  stroke-width: 1px;
-  opacity: 0.45;
-  pointer-events: none;
+  stroke-width: 0.55;
+  opacity: 0.8;
+}
+
+.muscle-hatch path {
+  stroke-width: 0.4;
+  opacity: 0.55;
 }
 
 /* A wider invisible edge so small muscles are easier to tap. */
@@ -156,13 +178,8 @@
   fill: var(--mark);
 }
 
-.muscle.is-focus .muscle-line {
-  stroke: var(--mark);
-}
-
-.muscle:focus-visible .muscle-line {
-  stroke: var(--accent);
-  stroke-width: 2.8px;
+.muscle:focus-visible .muscle-ink {
+  fill: var(--accent);
 }
 
 .ring {
