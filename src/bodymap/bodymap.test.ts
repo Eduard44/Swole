@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { closedShape, hashString, makeRandom } from '../drawn/paths'
+import { closedShape, hashString, hatchLines, makeRandom, penShape, sampleClosed } from '../drawn/paths'
 import { buildFigure, musclesInView, widthScale, CENTER_X } from './figures'
 import { MUSCLES } from './muscles'
 import { EMPTY_SELECTION, tapMuscle, unselectMuscle, zoomOut } from './selection'
@@ -21,6 +21,26 @@ describe('hand-drawn paths', () => {
       expect(n).toBeGreaterThanOrEqual(0)
       expect(n).toBeLessThan(1)
     }
+  })
+})
+
+describe('pen drawing', () => {
+  const square = [[0, 0], [10, 0], [10, 10], [0, 10]] as const
+
+  it('draws a curve that passes through every given point', () => {
+    const samples = sampleClosed(square, 4)
+    for (const [x, y] of square) {
+      expect(samples.some(([sx, sy]) => Math.abs(sx - x) < 1e-9 && Math.abs(sy - y) < 1e-9)).toBe(true)
+    }
+  })
+
+  it('inks the same shape the same way every time', () => {
+    expect(penShape(square, 9)).toEqual(penShape(square, 9))
+    expect(penShape(square, 9).ink).not.toBe(penShape(square, 10).ink)
+  })
+
+  it('returns the requested number of hatching strokes', () => {
+    expect(hatchLines(square, 3, 5)).toHaveLength(5)
   })
 })
 
@@ -51,6 +71,7 @@ describe('figures', () => {
     expect(chest.shapes).toHaveLength(2)
     const [left, right] = chest.shapes
     expect(right[0][0]).toBeCloseTo(CENTER_X * 2 - left[0][0])
+    expect(chest.details.length % 2).toBe(0)
   })
 
   it('gives the female figure narrower shoulders and wider hips', () => {
