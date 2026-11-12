@@ -12,7 +12,7 @@ Each change is built on a side branch and opened as a pull request. GitHub runs 
 
 ## Status
 
-Step 1 of 8 is done: project setup, theme tokens, light and dark themes, and automatic deploy. See [ROADMAP.md](ROADMAP.md) for what comes next.
+Steps 1 and 2 of 8 are done: project setup, themes and deploy, and the hand-drawn body map (front and back, male and female, tap a muscle to zoom in and mark it in red pencil). See [ROADMAP.md](ROADMAP.md) for what comes next.
 
 ## Run it on a computer
 
@@ -27,8 +27,13 @@ npm run build    # build the version that gets deployed
 
 ## Where things are
 
-- `src/styles/tokens.css`: every color, spacing, radius, shadow and animation speed. Change the look here.
+- `src/styles/tokens.css`: every color, spacing, radius and animation speed, plus the font. Change the look here.
+- `src/styles/app.css`: how the screen is laid out and how the body map is colored.
+- `src/drawn/`: the hand-drawn look (wobbly pencil lines, grain, drawn boxes).
+- `src/bodymap/figures.ts`: the figure drawings, as lists of points. Reshape a muscle here.
+- `src/bodymap/`: the body map itself, the 17 muscle groups, zoom and selection.
 - `src/theme/`: the light / dark / system switch.
-- `src/App.tsx`: the current screen (a placeholder that shows the theme).
+- `src/App.tsx`: the current screen.
 - `.github/workflows/deploy.yml`: builds and publishes the app to GitHub Pages.
 - `.github/workflows/check.yml`: runs the tests and the build on every pull request.
+- `CREDITS.md`: third-party material used in the app and its license.
