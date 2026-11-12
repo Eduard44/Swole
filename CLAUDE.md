@@ -1,4 +1,4 @@
-# Swole: master prompt (v01)
+# Swole: master prompt (v02)
 
 Read this first in every session. It is the source of truth for what Swole is, what is in scope, and how to build it. Change it only when the owner agrees, and bump the version.
 
@@ -21,7 +21,7 @@ Inspired by the idea of GymMane (github.com/InlitX/GymMane), but written from sc
 ## V1 scope
 
 In:
-- **Body map picker.** Front and back views, male and female figure toggle. Tap muscles to select them; the app lists matching exercises to build a session.
+- **Body map picker.** Front and back views, male and female figure toggle. Tap a muscle to select it: the map zooms in on it and marks it in red pencil. The app lists matching exercises to build a session.
 - **Session logging.** Add exercises, log sets (weight, reps), tick sets done, edit or delete, finish the session. Shows last time's numbers for each exercise.
 - **Rest timer.** Starts automatically when a set is ticked. Adjustable length, sound and vibration when done.
 - **What to train today.** Each muscle has a recovery state (fresh, recovering, just trained) worked out from recent sessions with simple rules. The body map is tinted by that state and the home screen suggests a focus. Offline rules only, no AI service.
@@ -33,14 +33,18 @@ Later (not v1, do not build yet):
 - Progress charts, records, estimated 1RM, streaks, heatmap
 - Routines, weekly plans, progression rules
 - Suggested next weight and reps, auto-built sessions
+- Beginner starter plan (a "New to the gym?" suggestion with a few simple full-body sessions)
 - Website / desktop layout, native Android wrapper
 - More languages
 
 ## Design
 
-- **Style:** clean minimal. Light theme is the primary design; dark mode is a full second theme, not an inversion.
-- Generous spacing, soft shadows, rounded shapes, one accent color, large clear numbers for weight and reps.
-- **Body map:** original abstract figures made of smooth rounded muscle shapes, drawn as SVG with one named path per muscle group so they can be tapped, tinted and animated. Male and female, front and back.
+- **Style:** hand-drawn, across the whole app. Lines look like pencil: they wobble slightly (the same way every time), have a faint second pass, and carry a noise grain. The paper background has a soft grain too. Layout stays clean and spacious underneath. The owner's PenCave site is the reference for the look; write Swole's version fresh and never change anything in PenCave.
+- **Themes:** light is the primary design; dark mode is a full second theme, not an inversion.
+- **Colors:** violet is the main color and lime the secondary. Light theme uses the calm versions; dark theme uses neon versions. Red pencil is reserved for one meaning only: a selected muscle. Unselected muscles are neutral grey.
+- **Type:** Roboto Flex for everything (wide and heavy for the wordmark, large clear numbers for weight and reps). Self-hosted inside the app, never loaded from the internet.
+- **Body map:** original figures made of hand-drawn muscle shapes, drawn as SVG with one named shape per muscle group so they can be tapped, tinted and animated. Male and female, front and back. The figures are drafted as SVG first; the owner reacts and refines.
+- **Muscle groups (17):** neck, traps, front delts, side delts, rear delts, chest, biceps, triceps, forearms, abs, obliques, lats, lower back, glutes, quads, hamstrings, calves.
 - **Motion:** calm and smooth. Soft easing, gentle fades and slides, no bounce, no confetti. Short durations (roughly 200 to 400 ms). Respect the reduced-motion setting.
 - Built for one-handed phone use in a gym: big touch targets, key actions in thumb reach, readable at a glance.
 - Phone first. It must not break on a wide screen, but desktop layout is not a v1 goal.
@@ -53,7 +57,8 @@ Later (not v1, do not build yet):
 - **Motion**: Motion (Framer Motion) plus CSS transitions.
 - **Styling**: CSS variables for theme tokens (colors, spacing, radii, shadows, durations) so light and dark share one system.
 - **Tests**: Vitest for the logic that matters (recovery rules, unit conversion, backup import/export).
-- **Hosting**: public GitHub repo, GitHub Actions builds and deploys to GitHub Pages on every push to `main`. The Pages link is how the owner checks work from their phone.
+- **Fonts**: bundled with the app (no font CDN), with the license recorded in `CREDITS.md`.
+- **Hosting**: public GitHub repo, GitHub Actions builds and deploys to GitHub Pages whenever a change lands on `main`. The Pages link is how the owner checks work from their phone.
 
 ## Data
 
@@ -64,7 +69,8 @@ Later (not v1, do not build yet):
 ## How we work
 
 - The owner works from a PC and from their phone, so the repo is the shared memory. Keep this file, a `README.md` and a short `ROADMAP.md` up to date.
-- Small steps: one feature or screen per change, each one deployed and checkable on the Pages link.
+- Small steps: one feature or screen per change. Each change is built on a side branch and opened as a pull request, with screenshots for the owner. GitHub runs the tests and build on it. The owner merges, and the change is then live on the Pages link.
+- Keep the owner on track. When an idea comes up that is outside v1, say so, add it to "Later", and return to the current step of the build order.
 - The owner is a designer, not a developer. Explain choices in plain language and ask before making decisions about look, feel or scope.
 - Show design before polish: get a screen working, let the owner react, then refine.
 - Never add accounts, tracking, ads, or anything that sends user data off the device.
@@ -82,7 +88,5 @@ Later (not v1, do not build yet):
 
 ## Open questions
 
-- Accent color and typeface.
-- Exact muscle groups on the body map (suggested 14 to 16: chest, front/side/rear delts, biceps, triceps, forearms, abs, obliques, traps, lats, lower back, glutes, quads, hamstrings, calves).
+- Recovery colors on the body map. Red is taken by "selected", so the proposal is shades of violet (pale for fresh, deep for just trained). Decide in step 6.
 - Recovery rule numbers (how many hours until a muscle counts as fresh).
-- Whether the owner draws the body figures or they are drafted as SVG first.
