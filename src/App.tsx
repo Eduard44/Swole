@@ -16,11 +16,12 @@ import { DrawnFrame, PencilDefs } from './drawn/Drawn'
 import { ExerciseLibrary } from './exercises/ExerciseLibrary'
 import { filterExercises, type Equipment, type Exercise } from './exercises/library'
 import { useExercises } from './exercises/useExercises'
+import { recoveryStates, suggest, type TrainedWorkout } from './recovery/recovery'
 import { THEME_CHOICES, type ThemeChoice } from './theme/theme'
 import { useTheme } from './theme/useTheme'
 import { HistoryScreen } from './workout/HistoryScreen'
 import { RestBar } from './workout/RestBar'
-import { activeSession, addExercise, exercisesIn } from './workout/store'
+import { activeSession, addExercise, exercisesIn, pastWorkouts } from './workout/store'
 import { useRestTimer } from './workout/useRestTimer'
 import { WorkoutScreen } from './workout/WorkoutScreen'
 
@@ -87,6 +88,20 @@ export function App() {
   }, [])
   const inWorkout = useMemo(() => new Set(workoutIds ?? []), [workoutIds])
   const addToWorkout = (exercise: Exercise) => void addExercise(exercise.id, selected)
+
+  // Recovery: which muscles each finished workout mainly worked, and when.
+  const past = useLiveQuery(() => pastWorkouts(), [])
+  const trained = useMemo<TrainedWorkout[] | null>(() => {
+    if (!past || !exercisesById) return null
+    return past.map(({ session, entries }) => ({
+      finishedAt: session.finishedAt ?? session.startedAt,
+      muscles: [...new Set(entries.flatMap((e) => exercisesById.get(e.exerciseId)?.primary ?? []))],
+    }))
+  }, [past, exercisesById])
+  const now = Date.now()
+  const states = useMemo(() => (trained ? recoveryStates(trained, now) : undefined), [trained, Math.floor(now / 60_000)])
+  const today = useMemo(() => (trained ? suggest(trained, now) : null), [trained, Math.floor(now / 60_000)])
+  const hasHistory = (past?.length ?? 0) > 0
   const matching = useMemo(
     () => (exercises ? filterExercises(exercises, { query: '', muscles: selected, equipment: [] }).length : null),
     [exercises, selected],
@@ -143,11 +158,31 @@ export function App() {
                 view={view}
                 figure={figure}
                 selected={selected}
+                states={states}
                 focus={focus}
                 onTapMuscle={(id) => setSelection((state) => tapMuscle(state, id))}
                 onTapPaper={() => setSelection(zoomOut)}
               />
             </div>
+
+            <ul className="legend" aria-label="Key">
+              <li>
+                <span className="legend-swatch is-fresh" />
+                Fresh
+              </li>
+              <li>
+                <span className="legend-swatch is-recovering" />
+                Recovering
+              </li>
+              <li>
+                <span className="legend-swatch is-trained" />
+                Just trained
+              </li>
+              <li>
+                <span className="legend-swatch is-selected" />
+                Selected
+              </li>
+            </ul>
 
             <section className="panel drawn" aria-live="polite">
               <DrawnFrame seed="panel" fill="surface" />
@@ -185,6 +220,30 @@ export function App() {
                     <DrawnFrame seed="see-exercises" fill="accent" />
                     {matching === null ? 'See exercises' : `See ${matching} exercises`}
                   </button>
+                </>
+              ) : today?.kind === 'train' ? (
+                <>
+                  <h2 className="panel-title">Today: {today.group}</h2>
+                  <p className="panel-note">
+                    {hasHistory
+                      ? `${today.muscles.map(muscleName).join(', ')} are fresh and have waited longest.`
+                      : 'A place to start. Or tap any muscle on the body to pick your own.'}
+                  </p>
+                  <button
+                    type="button"
+                    className="btn btn-primary drawn"
+                    onClick={() => setSelection({ selected: today.muscles, focus: null })}
+                  >
+                    <DrawnFrame seed="pick-today" fill="accent" />
+                    Pick {today.group.toLowerCase()} muscles
+                  </button>
+                </>
+              ) : today?.kind === 'rest' ? (
+                <>
+                  <h2 className="panel-title">Today: rest</h2>
+                  <p className="panel-note">
+                    Every muscle group still has something recovering. You can still tap a muscle to train it anyway.
+                  </p>
                 </>
               ) : (
                 <>
