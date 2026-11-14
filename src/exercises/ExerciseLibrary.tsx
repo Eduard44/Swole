@@ -16,6 +16,10 @@ type Props = {
   onQuery: (query: string) => void
   equipment: readonly Equipment[]
   onEquipment: (equipment: Equipment[]) => void
+  /** Exercises already in the running workout. */
+  inWorkout: ReadonlySet<string>
+  onAddToWorkout: (exercise: Exercise) => void
+  onOpenWorkout: () => void
 }
 
 const musclesText = (ids: readonly MuscleId[]) => ids.map(muscleName).join(', ')
@@ -24,6 +28,7 @@ const capital = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
 /** Search the exercise list, filter it by muscle and equipment, and open an exercise. */
 export function ExerciseLibrary(props: Props) {
   const { muscles, onToggleMuscle, onClearMuscles, query, onQuery, equipment, onEquipment } = props
+  const { inWorkout, onAddToWorkout, onOpenWorkout } = props
   const all = useExercises()
   const [shown, setShown] = useState(PAGE)
   const [open, setOpen] = useState<Exercise | null>(null)
@@ -118,12 +123,28 @@ export function ExerciseLibrary(props: Props) {
         )}
       </div>
 
-      {open && <ExerciseDetail exercise={open} onClose={() => setOpen(null)} />}
+      {open && (
+        <ExerciseDetail
+          exercise={open}
+          added={inWorkout.has(open.id)}
+          onAdd={() => onAddToWorkout(open)}
+          onOpenWorkout={onOpenWorkout}
+          onClose={() => setOpen(null)}
+        />
+      )}
     </div>
   )
 }
 
-function ExerciseDetail({ exercise, onClose }: { exercise: Exercise; onClose: () => void }) {
+type DetailProps = {
+  exercise: Exercise
+  added: boolean
+  onAdd: () => void
+  onOpenWorkout: () => void
+  onClose: () => void
+}
+
+function ExerciseDetail({ exercise, added, onAdd, onOpenWorkout, onClose }: DetailProps) {
   const closeRef = useRef<HTMLButtonElement>(null)
   useEffect(() => {
     closeRef.current?.focus()
@@ -163,6 +184,24 @@ function ExerciseDetail({ exercise, onClose }: { exercise: Exercise; onClose: ()
           <dd>{capital(exercise.level)}</dd>
         </div>
       </dl>
+      {added ? (
+        <div className="panel-actions">
+          <button type="button" className="btn drawn" onClick={onAdd}>
+            <DrawnFrame seed="add-again" />
+            Add again
+          </button>
+          <button type="button" className="btn btn-primary drawn" onClick={onOpenWorkout}>
+            <DrawnFrame seed="open-workout" fill="accent" />
+            Open workout
+          </button>
+        </div>
+      ) : (
+        <button type="button" className="btn btn-primary drawn" onClick={onAdd}>
+          <DrawnFrame seed="add-to-workout" fill="accent" />
+          Add to workout
+        </button>
+      )}
+      {added && <p className="panel-note">In this workout.</p>}
       {exercise.instructions.length > 0 && (
         <>
           <h3 className="detail-subtitle">How to do it</h3>
