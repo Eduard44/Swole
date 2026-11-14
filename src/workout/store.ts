@@ -1,5 +1,5 @@
 import type { MuscleId } from '../bodymap/muscles'
-import { db as defaultDb, type SessionExercise, type SwoleDb, type WorkoutSet } from '../db/db'
+import { db as defaultDb, type Session, type SessionExercise, type SwoleDb, type WorkoutSet } from '../db/db'
 import { keepDone, nextSet } from './logic'
 
 /**
@@ -99,4 +99,20 @@ export async function discardSession(sessionId: number, db: SwoleDb = defaultDb)
     await db.sessionExercises.where('sessionId').equals(sessionId).delete()
     await db.sessions.delete(sessionId)
   })
+}
+
+/** A finished workout with what was done in it. */
+export type PastWorkout = { session: Session; entries: SessionExercise[] }
+
+/** Finished workouts, newest first. */
+export async function pastWorkouts(db: SwoleDb = defaultDb): Promise<PastWorkout[]> {
+  const sessions = (await db.sessions.toArray())
+    .filter((s) => s.finishedAt !== null)
+    .sort((a, b) => (b.finishedAt ?? 0) - (a.finishedAt ?? 0))
+  return Promise.all(sessions.map(async (session) => ({ session, entries: await exercisesIn(session.id, db) })))
+}
+
+/** Delete one finished workout and its sets. */
+export async function deleteWorkout(sessionId: number, db: SwoleDb = defaultDb) {
+  await discardSession(sessionId, db)
 }

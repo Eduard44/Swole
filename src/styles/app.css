@@ -243,8 +243,8 @@
 .tabbar {
   flex: none;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-3);
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
 }
 
 .tab {
@@ -754,4 +754,42 @@
 .btn:disabled {
   opacity: 0.45;
   cursor: default;
+}
+
+/* History */
+.history {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  position: relative;
+}
+
+.past-exercise {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.past-sets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.past-sets li {
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.past-set {
+  font-size: var(--text-lg);
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
 }

@@ -80,3 +80,32 @@ export function duration(ms: number): string {
   if (minutes < 60) return `${minutes} min`
   return `${Math.floor(minutes / 60)} h ${String(minutes % 60).padStart(2, '0')} min`
 }
+
+/* ---------- History ---------- */
+
+/** The numbers shown for a past workout in the history list. */
+export function workoutTotals(entries: readonly { sets: WorkoutSet[] }[]): { exercises: number; sets: number } {
+  return { exercises: entries.length, sets: entries.reduce((n, e) => n + e.sets.length, 0) }
+}
+
+/** "3 exercises · 9 sets" */
+export function totalsText(entries: readonly { sets: WorkoutSet[] }[]): string {
+  const { exercises, sets } = workoutTotals(entries)
+  return `${exercises} exercise${exercises === 1 ? '' : 's'} · ${sets} set${sets === 1 ? '' : 's'}`
+}
+
+/** "Today", "Yesterday", or a date like "Sat 14 Nov" (with the year if it is not this year). */
+export function dayLabel(at: number, now: number, locale?: string): string {
+  const day = new Date(at)
+  const today = new Date(now)
+  const start = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
+  const daysAgo = Math.round((start(today) - start(day)) / 86_400_000)
+  if (daysAgo === 0) return 'Today'
+  if (daysAgo === 1) return 'Yesterday'
+  return day.toLocaleDateString(locale, {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    year: day.getFullYear() === today.getFullYear() ? undefined : 'numeric',
+  })
+}

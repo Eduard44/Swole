@@ -18,6 +18,7 @@ import { filterExercises, type Equipment, type Exercise } from './exercises/libr
 import { useExercises } from './exercises/useExercises'
 import { THEME_CHOICES, type ThemeChoice } from './theme/theme'
 import { useTheme } from './theme/useTheme'
+import { HistoryScreen } from './workout/HistoryScreen'
 import { RestBar } from './workout/RestBar'
 import { activeSession, addExercise, exercisesIn } from './workout/store'
 import { useRestTimer } from './workout/useRestTimer'
@@ -25,7 +26,7 @@ import { WorkoutScreen } from './workout/WorkoutScreen'
 
 const THEME_LABELS: Record<ThemeChoice, string> = { light: 'Light', dark: 'Dark', system: 'System' }
 
-type Screen = 'body' | 'exercises' | 'workout'
+type Screen = 'body' | 'exercises' | 'workout' | 'history'
 
 type SegmentedProps<T extends string> = {
   label: string
@@ -206,8 +207,10 @@ export function App() {
             onAddToWorkout={addToWorkout}
             onOpenWorkout={() => setScreen('workout')}
           />
-        ) : (
+        ) : screen === 'workout' ? (
           <WorkoutScreen exercisesById={exercisesById} onSetDone={rest.start} onBrowse={showExercises} />
+        ) : (
+          <HistoryScreen exercisesById={exercisesById} />
         )}
       </div>
 
@@ -219,6 +222,7 @@ export function App() {
             { id: 'body', label: 'Body' },
             { id: 'exercises', label: 'Exercises' },
             { id: 'workout', label: workoutIds?.length ? `Workout (${workoutIds.length})` : 'Workout' },
+            { id: 'history', label: 'History' },
           ] as const
         ).map((tab) => (
           <button
