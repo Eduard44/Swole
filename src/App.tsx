@@ -1,13 +1,26 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { BodyMap } from './bodymap/BodyMap'
 import { musclesInView, type FigureKind, type View } from './bodymap/figures'
-import { muscleName } from './bodymap/muscles'
-import { EMPTY_SELECTION, tapMuscle, unselectMuscle, zoomOut, type Selection } from './bodymap/selection'
+import { muscleName, type MuscleId } from './bodymap/muscles'
+import {
+  clearMuscles,
+  EMPTY_SELECTION,
+  tapMuscle,
+  toggleMuscle,
+  unselectMuscle,
+  zoomOut,
+  type Selection,
+} from './bodymap/selection'
 import { DrawnFrame, PencilDefs } from './drawn/Drawn'
+import { ExerciseLibrary } from './exercises/ExerciseLibrary'
+import { filterExercises, type Equipment } from './exercises/library'
+import { useExercises } from './exercises/useExercises'
 import { THEME_CHOICES, type ThemeChoice } from './theme/theme'
 import { useTheme } from './theme/useTheme'
 
 const THEME_LABELS: Record<ThemeChoice, string> = { light: 'Light', dark: 'Dark', system: 'System' }
+
+type Screen = 'body' | 'exercises'
 
 type SegmentedProps<T extends string> = {
   label: string
@@ -51,10 +64,19 @@ const FIGURES = [
 
 export function App() {
   const { choice, setChoice } = useTheme()
+  const [screen, setScreen] = useState<Screen>('body')
   const [view, setView] = useState<View>('front')
   const [figure, setFigure] = useState<FigureKind>('male')
   const [selection, setSelection] = useState<Selection>(EMPTY_SELECTION)
+  const [query, setQuery] = useState('')
+  const [equipment, setEquipment] = useState<Equipment[]>([])
   const { selected, focus } = selection
+
+  const exercises = useExercises()
+  const matching = useMemo(
+    () => (exercises ? filterExercises(exercises, { query: '', muscles: selected, equipment: [] }).length : null),
+    [exercises, selected],
+  )
 
   const nextTheme = THEME_CHOICES[(THEME_CHOICES.indexOf(choice) + 1) % THEME_CHOICES.length]
 
@@ -68,9 +90,13 @@ export function App() {
     setSelection(zoomOut)
   }
   // Jump to a selected muscle, turning the figure round if it is on the other side.
-  const jumpTo = (id: (typeof selected)[number]) => {
+  const jumpTo = (id: MuscleId) => {
     if (!musclesInView(view).includes(id)) setView(view === 'front' ? 'back' : 'front')
     setSelection((state) => ({ ...state, focus: id }))
+  }
+  const showExercises = () => {
+    setSelection(zoomOut)
+    setScreen('exercises')
   }
 
   return (
@@ -90,59 +116,102 @@ export function App() {
         </button>
       </header>
 
-      <div className="switches">
-        <Segmented label="View" options={VIEWS} value={view} onChange={changeView} />
-        <Segmented label="Figure" options={FIGURES} value={figure} onChange={changeFigure} />
-      </div>
-
-      <div className="stage">
-        <BodyMap
-          view={view}
-          figure={figure}
-          selected={selected}
-          focus={focus}
-          onTapMuscle={(id) => setSelection((state) => tapMuscle(state, id))}
-          onTapPaper={() => setSelection(zoomOut)}
-        />
-      </div>
-
-      <section className="panel drawn" aria-live="polite">
-        <DrawnFrame seed="panel" fill="surface" />
-        {focus ? (
+      <div className="screen" key={screen}>
+        {screen === 'body' ? (
           <>
-            <h2 className="panel-title">{muscleName(focus)}</h2>
-            <p className="panel-note">Selected for today.</p>
-            <div className="panel-actions">
-              <button type="button" className="btn drawn" onClick={() => setSelection((s) => unselectMuscle(s, focus))}>
-                <DrawnFrame seed="unselect" />
-                Unselect
-              </button>
-              <button type="button" className="btn btn-primary drawn" onClick={() => setSelection(zoomOut)}>
-                <DrawnFrame seed="back" fill="accent" />
-                Back to body
-              </button>
+            <div className="switches">
+              <Segmented label="View" options={VIEWS} value={view} onChange={changeView} />
+              <Segmented label="Figure" options={FIGURES} value={figure} onChange={changeFigure} />
             </div>
-          </>
-        ) : selected.length > 0 ? (
-          <>
-            <h2 className="panel-title">Today&rsquo;s muscles</h2>
-            <p className="panel-note">Tap another muscle to add it, or a name to go back to it.</p>
-            <div className="chips">
-              {selected.map((id) => (
-                <button key={id} type="button" className="btn chip drawn" onClick={() => jumpTo(id)}>
-                  <DrawnFrame seed={`chip-${id}`} fill="secondary" />
-                  {muscleName(id)}
-                </button>
-              ))}
+
+            <div className="stage">
+              <BodyMap
+                view={view}
+                figure={figure}
+                selected={selected}
+                focus={focus}
+                onTapMuscle={(id) => setSelection((state) => tapMuscle(state, id))}
+                onTapPaper={() => setSelection(zoomOut)}
+              />
             </div>
+
+            <section className="panel drawn" aria-live="polite">
+              <DrawnFrame seed="panel" fill="surface" />
+              {focus ? (
+                <>
+                  <h2 className="panel-title">{muscleName(focus)}</h2>
+                  <p className="panel-note">Selected for today.</p>
+                  <div className="panel-actions">
+                    <button
+                      type="button"
+                      className="btn drawn"
+                      onClick={() => setSelection((s) => unselectMuscle(s, focus))}
+                    >
+                      <DrawnFrame seed="unselect" />
+                      Unselect
+                    </button>
+                    <button type="button" className="btn btn-primary drawn" onClick={() => setSelection(zoomOut)}>
+                      <DrawnFrame seed="back" fill="accent" />
+                      Back to body
+                    </button>
+                  </div>
+                </>
+              ) : selected.length > 0 ? (
+                <>
+                  <h2 className="panel-title">Today&rsquo;s muscles</h2>
+                  <div className="chips">
+                    {selected.map((id) => (
+                      <button key={id} type="button" className="btn chip drawn" onClick={() => jumpTo(id)}>
+                        <DrawnFrame seed={`chip-${id}`} fill="secondary" />
+                        {muscleName(id)}
+                      </button>
+                    ))}
+                  </div>
+                  <button type="button" className="btn btn-primary drawn" onClick={showExercises}>
+                    <DrawnFrame seed="see-exercises" fill="accent" />
+                    {matching === null ? 'See exercises' : `See ${matching} exercises`}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <h2 className="panel-title">Tap a muscle</h2>
+                  <p className="panel-note">Pick what you want to train today. Turn the figure round for the back.</p>
+                </>
+              )}
+            </section>
           </>
         ) : (
-          <>
-            <h2 className="panel-title">Tap a muscle</h2>
-            <p className="panel-note">Pick what you want to train today. Turn the figure round for the back.</p>
-          </>
+          <ExerciseLibrary
+            muscles={selected}
+            onToggleMuscle={(id) => setSelection((state) => toggleMuscle(state, id))}
+            onClearMuscles={() => setSelection(clearMuscles())}
+            query={query}
+            onQuery={setQuery}
+            equipment={equipment}
+            onEquipment={setEquipment}
+          />
         )}
-      </section>
+      </div>
+
+      <nav className="tabbar" aria-label="Screens">
+        {(
+          [
+            { id: 'body', label: 'Body' },
+            { id: 'exercises', label: 'Exercises' },
+          ] as const
+        ).map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            className="btn tab drawn"
+            aria-current={screen === tab.id ? 'page' : undefined}
+            onClick={() => (tab.id === 'exercises' ? showExercises() : setScreen('body'))}
+          >
+            {screen === tab.id && <DrawnFrame seed={`tab-${tab.id}`} fill="secondary" />}
+            {tab.label}
+          </button>
+        ))}
+      </nav>
     </main>
   )
 }
