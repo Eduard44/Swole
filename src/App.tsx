@@ -1,3 +1,4 @@
+import { useLiveQuery } from 'dexie-react-hooks'
 import { useMemo, useState } from 'react'
 import { BodyMap } from './bodymap/BodyMap'
 import { musclesInView, type FigureKind, type View } from './bodymap/figures'
@@ -13,14 +14,18 @@ import {
 } from './bodymap/selection'
 import { DrawnFrame, PencilDefs } from './drawn/Drawn'
 import { ExerciseLibrary } from './exercises/ExerciseLibrary'
-import { filterExercises, type Equipment } from './exercises/library'
+import { filterExercises, type Equipment, type Exercise } from './exercises/library'
 import { useExercises } from './exercises/useExercises'
 import { THEME_CHOICES, type ThemeChoice } from './theme/theme'
 import { useTheme } from './theme/useTheme'
+import { RestBar } from './workout/RestBar'
+import { activeSession, addExercise, exercisesIn } from './workout/store'
+import { useRestTimer } from './workout/useRestTimer'
+import { WorkoutScreen } from './workout/WorkoutScreen'
 
 const THEME_LABELS: Record<ThemeChoice, string> = { light: 'Light', dark: 'Dark', system: 'System' }
 
-type Screen = 'body' | 'exercises'
+type Screen = 'body' | 'exercises' | 'workout'
 
 type SegmentedProps<T extends string> = {
   label: string
@@ -73,6 +78,14 @@ export function App() {
   const { selected, focus } = selection
 
   const exercises = useExercises()
+  const exercisesById = useMemo(() => (exercises ? new Map(exercises.map((e) => [e.id, e])) : null), [exercises])
+  const rest = useRestTimer()
+  const workoutIds = useLiveQuery(async () => {
+    const session = await activeSession()
+    return session ? (await exercisesIn(session.id)).map((e) => e.exerciseId) : []
+  }, [])
+  const inWorkout = useMemo(() => new Set(workoutIds ?? []), [workoutIds])
+  const addToWorkout = (exercise: Exercise) => void addExercise(exercise.id, selected)
   const matching = useMemo(
     () => (exercises ? filterExercises(exercises, { query: '', muscles: selected, equipment: [] }).length : null),
     [exercises, selected],
@@ -180,7 +193,7 @@ export function App() {
               )}
             </section>
           </>
-        ) : (
+        ) : screen === 'exercises' ? (
           <ExerciseLibrary
             muscles={selected}
             onToggleMuscle={(id) => setSelection((state) => toggleMuscle(state, id))}
@@ -189,15 +202,23 @@ export function App() {
             onQuery={setQuery}
             equipment={equipment}
             onEquipment={setEquipment}
+            inWorkout={inWorkout}
+            onAddToWorkout={addToWorkout}
+            onOpenWorkout={() => setScreen('workout')}
           />
+        ) : (
+          <WorkoutScreen exercisesById={exercisesById} onSetDone={rest.start} onBrowse={showExercises} />
         )}
       </div>
+
+      <RestBar timer={rest} />
 
       <nav className="tabbar" aria-label="Screens">
         {(
           [
             { id: 'body', label: 'Body' },
             { id: 'exercises', label: 'Exercises' },
+            { id: 'workout', label: workoutIds?.length ? `Workout (${workoutIds.length})` : 'Workout' },
           ] as const
         ).map((tab) => (
           <button
@@ -205,7 +226,7 @@ export function App() {
             type="button"
             className="btn tab drawn"
             aria-current={screen === tab.id ? 'page' : undefined}
-            onClick={() => (tab.id === 'exercises' ? showExercises() : setScreen('body'))}
+            onClick={() => (tab.id === 'exercises' ? showExercises() : setScreen(tab.id))}
           >
             {screen === tab.id && <DrawnFrame seed={`tab-${tab.id}`} fill="secondary" />}
             {tab.label}
