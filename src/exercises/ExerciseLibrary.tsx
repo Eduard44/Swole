@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { MUSCLES, muscleName, type MuscleId } from '../bodymap/muscles'
 import { Chip } from '../drawn/Chip'
 import { DrawnFrame } from '../drawn/Drawn'
+import { deleteCustomExercise } from './custom'
+import { CustomExerciseForm } from './CustomExerciseForm'
 import { EQUIPMENT, equipmentLabel, filterExercises, type Equipment, type Exercise } from './library'
 import { useExercises } from './useExercises'
 
@@ -32,6 +34,7 @@ export function ExerciseLibrary(props: Props) {
   const all = useExercises()
   const [shown, setShown] = useState(PAGE)
   const [open, setOpen] = useState<Exercise | null>(null)
+  const [creating, setCreating] = useState(false)
   const listRef = useRef<HTMLDivElement>(null)
 
   // Picked muscles come first, so they are always in view.
@@ -101,7 +104,7 @@ export function ExerciseLibrary(props: Props) {
 
       <div className="exercise-list" ref={listRef}>
         {all && results.length === 0 && (
-          <p className="empty">No exercises match. Try fewer words, or take off a filter.</p>
+          <p className="empty">No exercises match. Try fewer words, take off a filter, or add your own below.</p>
         )}
         <ul>
           {results.slice(0, shown).map((exercise) => (
@@ -109,6 +112,7 @@ export function ExerciseLibrary(props: Props) {
               <button type="button" className="exercise-row" onClick={() => setOpen(exercise)}>
                 <span className="exercise-name">{exercise.name}</span>
                 <span className="exercise-meta">
+                  {exercise.custom ? 'Yours · ' : ''}
                   {equipmentLabel(exercise.equipment)} · {musclesText(exercise.primary)}
                 </span>
               </button>
@@ -123,6 +127,16 @@ export function ExerciseLibrary(props: Props) {
         )}
       </div>
 
+      {all && results.length <= shown && !creating && (
+        <button type="button" className="btn btn-small drawn own" onClick={() => setCreating(true)}>
+          <DrawnFrame seed="own" />+ Add your own exercise
+        </button>
+      )}
+
+      {creating && (
+        <CustomExerciseForm startMuscles={muscles} startName={query.trim()} onClose={() => setCreating(false)} />
+      )}
+
       {open && (
         <ExerciseDetail
           exercise={open}
@@ -130,6 +144,10 @@ export function ExerciseLibrary(props: Props) {
           onAdd={() => onAddToWorkout(open)}
           onOpenWorkout={onOpenWorkout}
           onClose={() => setOpen(null)}
+          onDelete={() => {
+            void deleteCustomExercise(open.id)
+            setOpen(null)
+          }}
         />
       )}
     </div>
@@ -142,9 +160,11 @@ type DetailProps = {
   onAdd: () => void
   onOpenWorkout: () => void
   onClose: () => void
+  onDelete: () => void
 }
 
-function ExerciseDetail({ exercise, added, onAdd, onOpenWorkout, onClose }: DetailProps) {
+function ExerciseDetail({ exercise, added, onAdd, onOpenWorkout, onClose, onDelete }: DetailProps) {
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const closeRef = useRef<HTMLButtonElement>(null)
   useEffect(() => {
     closeRef.current?.focus()
@@ -179,10 +199,12 @@ function ExerciseDetail({ exercise, added, onAdd, onOpenWorkout, onClose }: Deta
           <dt>Equipment</dt>
           <dd>{equipmentLabel(exercise.equipment)}</dd>
         </div>
-        <div>
-          <dt>Level</dt>
-          <dd>{capital(exercise.level)}</dd>
-        </div>
+        {exercise.level && (
+          <div>
+            <dt>Level</dt>
+            <dd>{capital(exercise.level)}</dd>
+          </div>
+        )}
       </dl>
       {added ? (
         <div className="panel-actions">
@@ -202,6 +224,26 @@ function ExerciseDetail({ exercise, added, onAdd, onOpenWorkout, onClose }: Deta
         </button>
       )}
       {added && <p className="panel-note">In this workout.</p>}
+      {exercise.custom &&
+        (confirmDelete ? (
+          <div className="panel-actions">
+            <button type="button" className="btn drawn" onClick={() => setConfirmDelete(false)}>
+              <DrawnFrame seed="keep-own" />
+              Keep it
+            </button>
+            <button type="button" className="btn btn-danger drawn" onClick={onDelete}>
+              <DrawnFrame seed="delete-own" />
+              Delete
+            </button>
+          </div>
+        ) : (
+          <button type="button" className="btn btn-small btn-danger-text own-delete" onClick={() => setConfirmDelete(true)}>
+            Delete this exercise
+          </button>
+        ))}
+      {exercise.custom && confirmDelete && (
+        <p className="panel-note">Workouts that used it keep their sets.</p>
+      )}
       {exercise.instructions.length > 0 && (
         <>
           <h3 className="detail-subtitle">How to do it</h3>

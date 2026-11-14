@@ -59,7 +59,7 @@ export function WorkoutScreen({ exercisesById, onSetDone, onBrowse }: Props) {
     )
   }
 
-  const nameOf = (id: string) => exercisesById?.get(id)?.name ?? '…'
+  const nameOf = (id: string) => (exercisesById ? (exercisesById.get(id)?.name ?? 'Removed exercise') : '…')
   const open = openSets(entries)
   const started = new Date(session.startedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 

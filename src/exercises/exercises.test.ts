@@ -1,7 +1,10 @@
+import 'fake-indexeddb/auto'
 import { describe, expect, it } from 'vitest'
 import { MUSCLES } from '../bodymap/muscles'
 import data from './data.json'
-import { countByMuscle, filterExercises, normalize, toExercise, type RawExercise } from './library'
+import { SwoleDb } from '../db/db'
+import { addCustomExercise, cleanName, deleteCustomExercise } from './custom'
+import { countByMuscle, customId, customNumber, filterExercises, fromCustom, normalize, toExercise, type RawExercise } from './library'
 import { deltsFor, mapMuscles } from './mapping'
 
 const all = (data as RawExercise[]).map(toExercise)
@@ -69,5 +72,37 @@ describe('search and filters', () => {
 
   it('finds a well-known exercise', () => {
     expect(byName('Barbell Squat').primary).toContain('quads')
+  })
+})
+
+describe('your own exercises', () => {
+  it('tidies names', () => {
+    expect(cleanName('  Cable   Y-Raise ')).toBe('Cable Y-Raise')
+  })
+
+  it('saves one and shows it like any other exercise', async () => {
+    const db = new SwoleDb('custom-test-1')
+    const id = await addCustomExercise({ name: ' Cable  Y-Raise', muscles: ['side-delts'], equipment: 'cable' }, db)
+    const [row] = await db.customExercises.toArray()
+    const exercise = fromCustom(row)
+    expect(exercise).toMatchObject({ id: customId(id), name: 'Cable Y-Raise', primary: ['side-delts'], equipment: 'cable', custom: true })
+    const found = filterExercises([exercise, ...all], { query: 'y raise', muscles: ['side-delts'], equipment: ['cable'] })
+    expect(found[0].id).toBe(customId(id))
+  })
+
+  it('refuses an exercise with no name or no muscle', async () => {
+    const db = new SwoleDb('custom-test-2')
+    await expect(addCustomExercise({ name: '  ', muscles: ['chest'], equipment: 'other' }, db)).rejects.toThrow()
+    await expect(addCustomExercise({ name: 'Thing', muscles: [], equipment: 'other' }, db)).rejects.toThrow()
+  })
+
+  it('deletes only custom exercises', async () => {
+    const db = new SwoleDb('custom-test-3')
+    const id = await addCustomExercise({ name: 'Thing', muscles: ['chest'], equipment: 'other' }, db)
+    expect(customNumber('Barbell_Squat')).toBeNull()
+    await deleteCustomExercise('Barbell_Squat', db)
+    expect(await db.customExercises.count()).toBe(1)
+    await deleteCustomExercise(customId(id), db)
+    expect(await db.customExercises.count()).toBe(0)
   })
 })
