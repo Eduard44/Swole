@@ -35,18 +35,32 @@ export type SessionExercise = {
   sets: WorkoutSet[]
 }
 
+/** An exercise the owner of the phone added themselves. */
+export type CustomExercise = {
+  id: number
+  name: string
+  muscles: MuscleId[]
+  /** One of the equipment ids from the exercise library. */
+  equipment: string
+}
+
 /** The version of the saved data. Raise it, and add an upgrade, when the shape changes. */
-export const SCHEMA_VERSION = 1
+export const SCHEMA_VERSION = 2
 
 export class SwoleDb extends Dexie {
   sessions!: EntityTable<Session, 'id'>
   sessionExercises!: EntityTable<SessionExercise, 'id'>
+  customExercises!: EntityTable<CustomExercise, 'id'>
 
   constructor(name = 'swole') {
     super(name)
-    this.version(SCHEMA_VERSION).stores({
+    this.version(1).stores({
       sessions: '++id, startedAt, finishedAt',
       sessionExercises: '++id, sessionId, exerciseId',
+    })
+    // Version 2 adds the owner's own exercises. Existing workouts are untouched.
+    this.version(SCHEMA_VERSION).stores({
+      customExercises: '++id',
     })
   }
 }

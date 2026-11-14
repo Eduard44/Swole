@@ -60,6 +60,8 @@ export type Exercise = {
   instructions: string[]
   /** The name in lower case with punctuation removed, for searching. */
   searchText: string
+  /** True for an exercise the owner of the phone added. */
+  custom?: boolean
 }
 
 const KNOWN_EQUIPMENT = new Set<string>(EQUIPMENT.map((e) => e.id))
@@ -87,6 +89,31 @@ export function toExercise(raw: RawExercise): Exercise {
     secondary,
     instructions: raw.instructions,
     searchText: normalize(raw.name),
+  }
+}
+
+/** The id used for an exercise the owner added, built from its number in storage. */
+export const customId = (id: number) => `custom-${id}`
+
+/** The storage number behind a custom exercise id, or null for a built-in exercise. */
+export function customNumber(exerciseId: string): number | null {
+  const match = /^custom-(\d+)$/.exec(exerciseId)
+  return match ? Number(match[1]) : null
+}
+
+/** Turns a saved custom exercise into the same shape as the built-in ones. */
+export function fromCustom(row: { id: number; name: string; muscles: MuscleId[]; equipment: string }): Exercise {
+  return {
+    id: customId(row.id),
+    name: row.name,
+    category: 'strength',
+    equipment: (KNOWN_EQUIPMENT.has(row.equipment) ? row.equipment : 'other') as Equipment,
+    level: '',
+    primary: row.muscles,
+    secondary: [],
+    instructions: [],
+    searchText: normalize(row.name),
+    custom: true,
   }
 }
 
