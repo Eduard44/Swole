@@ -12,7 +12,7 @@ Each change is built on a side branch and opened as a pull request. GitHub runs 
 
 ## Status
 
-Steps 1 and 2 of 8 are done: project setup, themes and deploy, and the hand-drawn body map (front and back, male and female, tap a muscle to zoom in and mark it in red pencil). See [ROADMAP.md](ROADMAP.md) for what comes next.
+Steps 1 to 3 of 8 are done: project setup and deploy, the body map, and the exercise library (876 exercises to search and filter by muscle and equipment). See [ROADMAP.md](ROADMAP.md) for what comes next.
 
 ## Run it on a computer
 
@@ -33,6 +33,8 @@ npm run build    # build the version that gets deployed
 - `src/bodymap/figures.ts`: the figure drawings, as lists of points. Reshape a muscle here.
 - `src/bodymap/`: the body map itself, the 17 muscle groups, zoom and selection.
 - `src/theme/`: the light / dark / system switch.
+- `src/exercises/`: the exercise library: the data, how its muscle names map onto Swole's 17 groups (`mapping.ts`), and search and filters.
+- `scripts/import-exercises.mjs`: refreshes the exercise data from the dataset.
 - `src/App.tsx`: the current screen.
 - `.github/workflows/deploy.yml`: builds and publishes the app to GitHub Pages.
 - `.github/workflows/check.yml`: runs the tests and the build on every pull request.

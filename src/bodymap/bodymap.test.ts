@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { closedShape, hashString, makeRandom, penShape, sampleClosed } from '../drawn/paths'
 import { buildFigure, musclesInView, widthScale, CENTER_X } from './figures'
 import { MUSCLES } from './muscles'
-import { EMPTY_SELECTION, tapMuscle, unselectMuscle, zoomOut } from './selection'
+import { EMPTY_SELECTION, tapMuscle, toggleMuscle, unselectMuscle, zoomOut } from './selection'
 import { FULL_VIEW, zoomTarget } from './zoom'
 
 describe('hand-drawn paths', () => {
@@ -115,5 +115,11 @@ describe('selection', () => {
   it('unselects and zooms out', () => {
     const state = unselectMuscle(tapMuscle(EMPTY_SELECTION, 'chest'), 'chest')
     expect(state).toEqual({ selected: [], focus: null })
+  })
+
+  it('toggles a muscle from the exercise filters without zooming', () => {
+    const on = toggleMuscle(tapMuscle(EMPTY_SELECTION, 'chest'), 'biceps')
+    expect(on).toEqual({ selected: ['chest', 'biceps'], focus: null })
+    expect(toggleMuscle(on, 'chest')).toEqual({ selected: ['biceps'], focus: null })
   })
 })

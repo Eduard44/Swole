@@ -24,3 +24,14 @@ export function unselectMuscle(state: Selection, id: MuscleId): Selection {
 export function zoomOut(state: Selection): Selection {
   return { ...state, focus: null }
 }
+
+/** Add or remove a muscle without zooming (used by the filters on the exercise list). */
+export function toggleMuscle(state: Selection, id: MuscleId): Selection {
+  const selected = state.selected.includes(id) ? state.selected.filter((m) => m !== id) : [...state.selected, id]
+  return { selected, focus: null }
+}
+
+/** Unselect every muscle. */
+export function clearMuscles(): Selection {
+  return EMPTY_SELECTION
+}

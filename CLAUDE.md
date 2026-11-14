@@ -1,4 +1,4 @@
-# Swole: master prompt (v03)
+# Swole: master prompt (v04)
 
 Read this first in every session. It is the source of truth for what Swole is, what is in scope, and how to build it. Change it only when the owner agrees, and bump the version.
 
@@ -24,7 +24,7 @@ In:
 - **Body map picker.** Front and back views, male and female figure toggle. Tap a muscle to select it: the map zooms in on it and marks it in red pencil. The app lists matching exercises to build a session.
 - **Session logging.** Add exercises, log sets (weight, reps), tick sets done, edit or delete, finish the session. Shows last time's numbers for each exercise.
 - **Rest timer.** Starts automatically when a set is ticked. Adjustable length, sound and vibration when done.
-- **What to train today.** Each muscle has a recovery state (fresh, recovering, just trained) worked out from recent sessions with simple rules. The body map is tinted by that state and the home screen suggests a focus. Offline rules only, no AI service.
+- **What to train today.** Each muscle has a recovery state (fresh, recovering, just trained) worked out from recent sessions with simple rules. The body map is tinted by that state and the home screen suggests a focus. Offline rules only, no online service.
 - **Exercise library.** From an open dataset (see Data). Search, filter by muscle and equipment. Add custom exercises.
 - **History.** List of past sessions, open one to see what was done.
 - **Settings.** kg or lb, light / dark / system theme, figure choice, default rest time, export and import backup (JSON file), delete everything.
