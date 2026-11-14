@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { SwoleDb } from '../db/db'
-import { clampRest, clock, describeSets, duration, keepDone, nextSet, parseNumber, secondsLeft } from './logic'
+import { clampRest, clock, dayLabel, describeSets, duration, keepDone, nextSet, parseNumber, secondsLeft, totalsText } from './logic'
 import {
   activeSession,
   addExercise,
@@ -9,7 +9,9 @@ import {
   discardSession,
   exercisesIn,
   finishSession,
+  deleteWorkout,
   lastTime,
+  pastWorkouts,
   removeSet,
   updateSet,
 } from './store'
@@ -137,5 +139,44 @@ describe('saving workouts', () => {
     await discardSession(id, db)
     expect(await activeSession(db)).toBeNull()
     expect(await exercisesIn(id, db)).toEqual([])
+  })
+
+  it('lists finished workouts newest first, without the running one', async () => {
+    const tick = async (sessionId: number) => {
+      const [entry] = await exercisesIn(sessionId, db)
+      await updateSet(entry.id, 0, { weight: 50, reps: 5, done: true }, db)
+    }
+    const first = await addExercise('Bench', [], db)
+    await tick(first)
+    await finishSession(first, db)
+    await new Promise((r) => setTimeout(r, 5))
+    const second = await addExercise('Squat', [], db)
+    await tick(second)
+    await finishSession(second, db)
+    await addExercise('Curl', [], db)
+
+    const past = await pastWorkouts(db)
+    expect(past.map((w) => w.session.id)).toEqual([second, first])
+    expect(past[0].entries[0].exerciseId).toBe('Squat')
+
+    await deleteWorkout(second, db)
+    expect((await pastWorkouts(db)).map((w) => w.session.id)).toEqual([first])
+  })
+})
+
+describe('history', () => {
+  const s = (weight: number, reps: number) => ({ weight, reps, done: true })
+
+  it('sums up a workout', () => {
+    expect(totalsText([{ sets: [s(80, 8), s(80, 8)] }, { sets: [s(20, 12)] }])).toBe('2 exercises · 3 sets')
+    expect(totalsText([{ sets: [s(80, 8)] }])).toBe('1 exercise · 1 set')
+  })
+
+  it('names recent days in words and older ones by date', () => {
+    const now = new Date(2026, 10, 14, 9, 0).getTime()
+    expect(dayLabel(new Date(2026, 10, 14, 7, 0).getTime(), now)).toBe('Today')
+    expect(dayLabel(new Date(2026, 10, 13, 23, 0).getTime(), now)).toBe('Yesterday')
+    expect(dayLabel(new Date(2026, 10, 10, 18, 0).getTime(), now, 'en-GB')).toMatch(/^Tue,? 10 Nov$/)
+    expect(dayLabel(new Date(2025, 11, 30, 18, 0).getTime(), now, 'en-GB')).toMatch(/^Tue,? 30 Dec 2025$/)
   })
 })

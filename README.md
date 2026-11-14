@@ -12,7 +12,7 @@ Each change is built on a side branch and opened as a pull request. GitHub runs 
 
 ## Status
 
-Steps 1 to 4 of 8 are done: project setup and deploy, the body map, the exercise library, and workout logging with a rest timer. Workouts are saved on the device. See [ROADMAP.md](ROADMAP.md) for what comes next.
+Steps 1 to 5 of 8 are done: project setup and deploy, the body map, the exercise library (with your own exercises), workout logging with a rest timer, and history. Everything you log is saved on the device. See [ROADMAP.md](ROADMAP.md) for what comes next.
 
 ## Run it on a computer
 
