@@ -4,7 +4,8 @@
  *
  * Light is the primary design, with calm violet and lime.
  * Dark is its own theme, with neon versions of the same two colors.
- * Red pencil (--mark) means one thing only: a selected muscle.
+ * Red belongs to the body map: the red pencil ring (--mark) marks the muscle
+ * you are on, and shades of red show recovery (--recovering, --trained).
  */
 
 /* Roboto Flex, bundled with the app (weight and width are both adjustable). */
@@ -70,6 +71,8 @@
   --body: #eeecf2;
   --muscle: #d6d3de;
   --mark: #d8443a;
+  --recovering: #f3cbc6;
+  --trained: #d8443a;
   --grain: 0.2;
 }
 
@@ -88,6 +91,8 @@
   --body: #211e2a;
   --muscle: #383446;
   --mark: #ff5c4d;
+  --recovering: #6b2a26;
+  --trained: #e8554a;
   --grain: 0.28;
 }
 
@@ -105,6 +110,8 @@
     --body: #211e2a;
     --muscle: #383446;
     --mark: #ff5c4d;
+    --recovering: #6b2a26;
+    --trained: #e8554a;
     --grain: 0.28;
   }
 }

@@ -1,4 +1,4 @@
-# Swole: master prompt (v04)
+# Swole: master prompt (v05)
 
 Read this first in every session. It is the source of truth for what Swole is, what is in scope, and how to build it. Change it only when the owner agrees, and bump the version.
 
@@ -21,10 +21,10 @@ Inspired by the idea of GymMane (github.com/InlitX/GymMane), but written from sc
 ## V1 scope
 
 In:
-- **Body map picker.** Front and back views, male and female figure toggle. Tap a muscle to select it: the map zooms in on it and marks it in red pencil. The app lists matching exercises to build a session.
+- **Body map picker.** Front and back views, male and female figure toggle. Tap a muscle to select it: the map zooms in on it, rings it in red pencil and shades it with slanted dashed strokes. The app lists matching exercises to build a session.
 - **Session logging.** Add exercises, log sets (weight, reps), tick sets done, edit or delete, finish the session. Shows last time's numbers for each exercise.
 - **Rest timer.** Starts automatically when a set is ticked. Adjustable length, sound and vibration when done.
-- **What to train today.** Each muscle has a recovery state (fresh, recovering, just trained) worked out from recent sessions with simple rules. The body map is tinted by that state and the home screen suggests a focus. Offline rules only, no online service.
+- **What to train today.** Each muscle has a recovery state (fresh, recovering, just trained) worked out from recent sessions with simple rules: just trained for 24 hours, recovering until 48 hours (72 for quads, hamstrings, glutes, lats and chest), then fresh. The body map is tinted by that state and the home screen suggests a focus: the muscle group (push, pull, legs or core) that is fully fresh and has waited longest, or rest if none is. Offline rules only, no online service.
 - **Exercise library.** From an open dataset (see Data). Search, filter by muscle and equipment. Add custom exercises.
 - **History.** List of past sessions, open one to see what was done.
 - **Settings.** kg or lb, light / dark / system theme, figure choice, default rest time, export and import backup (JSON file), delete everything.
@@ -41,7 +41,7 @@ Later (not v1, do not build yet):
 
 - **Style:** hand-drawn, across the whole app. Lines look like pencil: they wobble slightly (the same way every time), have a faint second pass, and carry a noise grain. The paper background has a soft grain too. Layout stays clean and spacious underneath. The owner's PenCave site is the reference for the look; write Swole's version fresh and never change anything in PenCave.
 - **Themes:** light is the primary design; dark mode is a full second theme, not an inversion.
-- **Colors:** violet is the main color and lime the secondary. Light theme uses the calm versions; dark theme uses neon versions. Red pencil is reserved for one meaning only: a selected muscle. Unselected muscles are neutral grey.
+- **Colors:** violet is the main color and lime the secondary. Light theme uses the calm versions; dark theme uses neon versions. Red belongs to the body map. Shades of red show recovery: grey for fresh, pale red for recovering, strong red for just trained. A selected muscle is shown by form, not color: slanted dashed strokes like manga shading, plus a red pencil ring on the one zoomed in on.
 - **Type:** Roboto Flex for everything (wide and heavy for the wordmark, large clear numbers for weight and reps). Self-hosted inside the app, never loaded from the internet.
 - **Body map:** original figures drawn like a manga pen sketch: one filled body with a strong pen outline, and the muscles as shapes that fit together inside it, separated by finer pen lines. Sketchy, not highly detailed; no heavy texture or hatching. Drawn as SVG with one named shape per muscle group so they can be tapped, tinted and animated. Male and female, front and back. The figures are drafted as SVG first; the owner reacts and refines.
 - **Muscle groups (17):** neck, traps, front delts, side delts, rear delts, chest, biceps, triceps, forearms, abs, obliques, lats, lower back, glutes, quads, hamstrings, calves.
@@ -88,5 +88,5 @@ Later (not v1, do not build yet):
 
 ## Open questions
 
-- Recovery colors on the body map. Red is taken by "selected", so the proposal is shades of violet (pale for fresh, deep for just trained). Decide in step 6.
-- Recovery rule numbers (how many hours until a muscle counts as fresh).
+- Exercise images: none, a small hand-picked set, or the owner's own sketches for common exercises.
+- Refining the figures from the owner's references, including a properly drawn female figure.

@@ -209,3 +209,23 @@ export function penShape(points: readonly Point[], seed: number, weight = 0.9, a
 export function penLine(points: readonly Point[], seed: number, amp = 0.6): string {
   return polyPath(sampleOpen(jitter(points, seed, amp)), false)
 }
+
+/**
+ * Manga-style shading: slanted dashed strokes across the whole box of a shape.
+ * The caller clips them to the shape. Each stroke is "x1 y1 x2 y2" as a path.
+ */
+export function shadeLines(points: readonly Point[], seed: number, spacing = 2.6): string[] {
+  const box = boundsOf(points)
+  const rand = makeRandom(seed + 91)
+  const lines: string[] = []
+  // Strokes run from lower left to upper right; step along the bottom edge.
+  for (let k = -box.height; k < box.width; k += spacing) {
+    const wobble = (rand() - 0.5) * 0.6
+    const x1 = box.x + k + wobble
+    const y1 = box.y + box.height
+    const x2 = x1 + box.height * 0.8
+    const y2 = box.y
+    lines.push(`M${x1.toFixed(2)} ${y1.toFixed(2)}L${x2.toFixed(2)} ${y2.toFixed(2)}`)
+  }
+  return lines
+}

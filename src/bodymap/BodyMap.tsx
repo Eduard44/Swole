@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { boundsOf, closedShape, hashString, penLine, penShape, ringPath, type Box } from '../drawn/paths'
+import { boundsOf, closedShape, hashString, penLine, penShape, ringPath, shadeLines, type Box } from '../drawn/paths'
+import type { RecoveryState } from '../recovery/recovery'
 import { buildFigure, type FigureKind, type View } from './figures'
 import { muscleName, type MuscleId } from './muscles'
 import { FULL_VIEW, zoomTarget } from './zoom'
@@ -8,6 +9,8 @@ type Props = {
   view: View
   figure: FigureKind
   selected: readonly MuscleId[]
+  /** How rested each muscle is. It sets the shade of red. */
+  states?: Partial<Record<MuscleId, RecoveryState>>
   /** The muscle zoomed in on, if any. */
   focus: MuscleId | null
   onTapMuscle: (id: MuscleId) => void
@@ -21,8 +24,12 @@ const easeInOut = (k: number) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k 
 const prefersReducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-/** The body, inked as a pen sketch. Tap a muscle to zoom in on it; it is ringed in red pencil. */
-export function BodyMap({ view, figure, selected, focus, onTapMuscle, onTapPaper }: Props) {
+/**
+ * The body, inked as a pen sketch. The shade of red on a muscle shows how
+ * rested it is. A selected muscle is shaded with slanted dashed strokes, and
+ * tapping one zooms in and rings it in red pencil.
+ */
+export function BodyMap({ view, figure, selected, states, focus, onTapMuscle, onTapPaper }: Props) {
   const svgRef = useRef<SVGSVGElement>(null)
   const current = useRef<Box>(FULL_VIEW)
   const [ringUnit, setRingUnit] = useState(1)
@@ -104,7 +111,7 @@ export function BodyMap({ view, figure, selected, focus, onTapMuscle, onTapPaper
             return (
               <g
                 key={muscle.id}
-                className={isSelected ? 'muscle is-selected' : 'muscle'}
+                className={`muscle is-${states?.[muscle.id] ?? 'fresh'}${isSelected ? ' is-selected' : ''}`}
                 role="button"
                 tabIndex={0}
                 aria-label={muscleName(muscle.id)}
@@ -121,11 +128,25 @@ export function BodyMap({ view, figure, selected, focus, onTapMuscle, onTapPaper
                 }}
               >
                 {muscle.shapes.map((shape, i) => {
-                  const seed = hashString(`${view}-${muscle.id}-${i}`)
+                  const name = `${view}-${muscle.id}-${i}`
+                  const seed = hashString(name)
                   const pen = penShape(shape, seed, 0.75)
+                  const clip = `shade-${figure}-${name}`
                   return (
                     <g key={i}>
                       <path className="muscle-fill" d={pen.fill} />
+                      {isSelected && (
+                        <>
+                          <clipPath id={clip}>
+                            <path d={pen.fill} />
+                          </clipPath>
+                          <g className="muscle-shade" clipPath={`url(#${clip})`}>
+                            {shadeLines(shape, seed).map((d, k) => (
+                              <path key={k} d={d} />
+                            ))}
+                          </g>
+                        </>
+                      )}
                       <path className="muscle-sketch" d={closedShape(shape, seed + 500, 2)} />
                       <path className="muscle-ink" d={pen.ink} />
                     </g>
