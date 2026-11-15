@@ -5,7 +5,7 @@ import { DrawnFrame } from '../drawn/Drawn'
 import type { Exercise } from '../exercises/library'
 import { useSettings } from '../settings/settings'
 import { fromDisplay, toDisplay, type Units } from '../settings/units'
-import { describeSets, duration, formatNumber, openSets, parseNumber } from './logic'
+import { describeSets, duration, formatNumber, keepDone, openSets, parseNumber, totalsText } from './logic'
 import {
   activeSession,
   addSet,
@@ -23,10 +23,11 @@ type Props = {
   /** Called when a set is ticked done, to start the rest timer. */
   onSetDone: () => void
   onBrowse: () => void
+  onHistory: () => void
 }
 
 /** The workout in progress: exercises, sets, and finishing up. */
-export function WorkoutScreen({ exercisesById, onSetDone, onBrowse }: Props) {
+export function WorkoutScreen({ exercisesById, onSetDone, onBrowse, onHistory }: Props) {
   const session = useLiveQuery(() => activeSession(), [])
   const entries = useLiveQuery(() => (session ? exercisesIn(session.id) : []), [session?.id]) ?? []
   const history = useLiveQuery(
@@ -35,6 +36,8 @@ export function WorkoutScreen({ exercisesById, onSetDone, onBrowse }: Props) {
   )
   const { units } = useSettings()
   const [confirm, setConfirm] = useState<'finish' | 'discard' | null>(null)
+  /** What the workout just finished held, shown once it is saved. */
+  const [saved, setSaved] = useState<string | null>(null)
   const [now, setNow] = useState(() => Date.now())
 
   useEffect(() => {
@@ -47,8 +50,18 @@ export function WorkoutScreen({ exercisesById, onSetDone, onBrowse }: Props) {
   if (!session) {
     return (
       <div className="workout">
+        {saved && (
+          <section className="workout-saved drawn" role="status">
+            <DrawnFrame seed="saved" fill="secondary" />
+            <h2 className="card-title">Workout saved</h2>
+            <p>{saved}</p>
+            <button type="button" className="btn btn-small" onClick={onHistory}>
+              See it in History
+            </button>
+          </section>
+        )}
         <section className="workout-empty">
-          <h2 className="panel-title">No workout yet</h2>
+          <h2 className="panel-title">{saved ? 'Start another' : 'No workout yet'}</h2>
           <p className="panel-note">
             Pick muscles on the body, open an exercise and tap Add to workout. The workout starts with the first
             exercise.
@@ -112,6 +125,8 @@ export function WorkoutScreen({ exercisesById, onSetDone, onBrowse }: Props) {
                 className="btn btn-primary drawn"
                 onClick={() => {
                   setConfirm(null)
+                  const kept = keepDone(entries)
+                  setSaved(kept.length ? totalsText(kept) : null)
                   void finishSession(session.id)
                 }}
               >

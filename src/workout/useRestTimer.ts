@@ -42,6 +42,8 @@ function beep(context: AudioContext | null) {
 export type RestTimer = {
   /** Seconds left, or null when no rest is running. */
   left: number | null
+  /** How much of the rest is left, from 1 (just started) down to 0. */
+  fraction: number
   /** True for a few seconds after a rest ends. */
   over: boolean
   /** The rest length used for the next rest, in seconds. */
@@ -65,6 +67,8 @@ export function useRestTimer(): RestTimer {
   })
   const [now, setNow] = useState(() => Date.now())
   const [over, setOver] = useState(false)
+  // The full length of the running rest, for the progress line.
+  const [total, setTotal] = useState(length)
   const audio = useRef<AudioContext | null>(null)
 
   useEffect(() => {
@@ -105,6 +109,7 @@ export function useRestTimer(): RestTimer {
     const ends = t + length * 1000
     setNow(t)
     setOver(false)
+    setTotal(length)
     setEndsAt(ends)
     write(ENDS_KEY, ends)
   }, [length])
@@ -115,6 +120,7 @@ export function useRestTimer(): RestTimer {
       if (endsAt !== null) {
         const t = Date.now()
         const next = Math.max(t + 1000, endsAt + seconds * 1000)
+        setTotal((current) => Math.max(1, current + seconds))
         setNow(t)
         setEndsAt(next)
         write(ENDS_KEY, next)
@@ -129,5 +135,7 @@ export function useRestTimer(): RestTimer {
     setOver(false)
   }, [])
 
-  return { left: endsAt === null ? null : secondsLeft(endsAt, now), over, length, start, adjust, skip }
+  const left = endsAt === null ? null : secondsLeft(endsAt, now)
+  const fraction = endsAt === null ? 0 : Math.min(1, Math.max(0, (endsAt - now) / 1000 / Math.max(total, left ?? 0, 1)))
+  return { left, fraction, over, length, start, adjust, skip }
 }
