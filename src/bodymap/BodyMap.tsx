@@ -141,7 +141,7 @@ export function BodyMap({ view, figure, selected, states, focus, onTapMuscle, on
                             <path d={pen.fill} />
                           </clipPath>
                           <g className="muscle-shade" clipPath={`url(#${clip})`}>
-                            {shadeLines(shape, seed).map((d, k) => (
+                            {shadeLines(shape, seed, 2.3).map((d, k) => (
                               <path key={k} d={d} />
                             ))}
                           </g>
