@@ -12,7 +12,7 @@ Each change is built on a side branch and opened as a pull request. GitHub runs 
 
 ## Status
 
-Steps 1 to 6 of 8 are done: project setup and deploy, the body map, the exercise library (with your own exercises), workout logging with a rest timer, history, and recovery with "what to train today". Everything you log is saved on the device. See [ROADMAP.md](ROADMAP.md) for what comes next.
+Steps 1 to 7 of 8 are done. Swole has the body map, the exercise library (with your own exercises), workout logging with a rest timer, history, recovery with "what to train today", settings with backup, and it can be put on a phone's home screen and used with no connection. Everything you log is saved on the device. See [ROADMAP.md](ROADMAP.md) for what comes next.
 
 ## Run it on a computer
 
@@ -36,6 +36,9 @@ npm run build    # build the version that gets deployed
 - `src/exercises/`: the exercise library: the data, how its muscle names map onto Swole's 17 groups (`mapping.ts`), and search and filters.
 - `scripts/import-exercises.mjs`: refreshes the exercise data from the dataset.
 - `src/recovery/recovery.ts`: the recovery rules and the "what to train today" suggestion. Change the hours here.
+- `src/settings/`: the Settings screen, kg / lb conversion, and backup (save, restore, delete everything).
+- `src/pwa.ts` and `vite.config.ts`: what makes Swole installable and usable offline. The build writes `sw.js`, which keeps a copy of the app on the device.
+- `public/`: the app icons and the manifest that names the app on the home screen.
 - `src/db/db.ts`: what is saved on the device (workouts and their sets).
 - `src/workout/`: workout logging and the rest timer. `logic.ts` holds the rules, `store.ts` the saving.
 - `src/App.tsx`: the current screen.

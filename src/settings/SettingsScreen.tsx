@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import type { FigureKind } from '../bodymap/figures'
 import { DrawnFrame } from '../drawn/Drawn'
+import { isInstalled, useInstall } from '../pwa'
 import { parseThemeChoice, type ThemeChoice } from '../theme/theme'
 import { clampRest, clock, REST_MAX, REST_MIN, REST_STEP } from '../workout/logic'
 import { backupFileName, backupSummary, deleteEverything, makeBackup, parseBackup, restoreBackup, type Backup } from './backup'
@@ -74,6 +75,7 @@ export function SettingsScreen({ theme, onTheme }: Props) {
   const [pending, setPending] = useState<Backup | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const install = useInstall()
 
   const exportBackup = async () => {
     const backup = await makeBackup(settings, theme)
@@ -147,6 +149,26 @@ export function SettingsScreen({ theme, onTheme }: Props) {
             </button>
           </div>
         </div>
+
+        {!isInstalled() && (
+          <section className="settings-block" aria-labelledby="install-title">
+            <h3 id="install-title" className="card-title">
+              Put Swole on your home screen
+            </h3>
+            <p className="panel-note">
+              It then opens like an app and works with no connection.{' '}
+              {install
+                ? ''
+                : 'On Android, open the browser menu and choose "Add to Home screen" or "Install app". On iPhone, tap Share, then "Add to Home Screen".'}
+            </p>
+            {install && (
+              <button type="button" className="btn btn-primary drawn" onClick={install}>
+                <DrawnFrame seed="install" fill="accent" />
+                Install Swole
+              </button>
+            )}
+          </section>
+        )}
 
         <section className="settings-block" aria-labelledby="backup-title">
           <h3 id="backup-title" className="card-title">
