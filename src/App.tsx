@@ -17,7 +17,8 @@ import { ExerciseLibrary } from './exercises/ExerciseLibrary'
 import { filterExercises, type Equipment, type Exercise } from './exercises/library'
 import { useExercises } from './exercises/useExercises'
 import { recoveryStates, suggest, type TrainedWorkout } from './recovery/recovery'
-import { THEME_CHOICES, type ThemeChoice } from './theme/theme'
+import { setSettings, useSettings } from './settings/settings'
+import { SettingsScreen } from './settings/SettingsScreen'
 import { useTheme } from './theme/useTheme'
 import { HistoryScreen } from './workout/HistoryScreen'
 import { RestBar } from './workout/RestBar'
@@ -25,9 +26,7 @@ import { activeSession, addExercise, exercisesIn, pastWorkouts } from './workout
 import { useRestTimer } from './workout/useRestTimer'
 import { WorkoutScreen } from './workout/WorkoutScreen'
 
-const THEME_LABELS: Record<ThemeChoice, string> = { light: 'Light', dark: 'Dark', system: 'System' }
-
-type Screen = 'body' | 'exercises' | 'workout' | 'history'
+type Screen = 'body' | 'exercises' | 'workout' | 'history' | 'settings'
 
 type SegmentedProps<T extends string> = {
   label: string
@@ -73,7 +72,7 @@ export function App() {
   const { choice, setChoice } = useTheme()
   const [screen, setScreen] = useState<Screen>('body')
   const [view, setView] = useState<View>('front')
-  const [figure, setFigure] = useState<FigureKind>('male')
+  const { figure } = useSettings()
   const [selection, setSelection] = useState<Selection>(EMPTY_SELECTION)
   const [query, setQuery] = useState('')
   const [equipment, setEquipment] = useState<Equipment[]>([])
@@ -107,15 +106,13 @@ export function App() {
     [exercises, selected],
   )
 
-  const nextTheme = THEME_CHOICES[(THEME_CHOICES.indexOf(choice) + 1) % THEME_CHOICES.length]
-
   // Turning the figure round zooms back out first.
   const changeView = (next: View) => {
     setView(next)
     setSelection(zoomOut)
   }
   const changeFigure = (next: FigureKind) => {
-    setFigure(next)
+    setSettings({ figure: next })
     setSelection(zoomOut)
   }
   // Jump to a selected muscle, turning the figure round if it is on the other side.
@@ -137,11 +134,11 @@ export function App() {
         <button
           type="button"
           className="btn btn-small drawn"
-          onClick={() => setChoice(nextTheme)}
-          aria-label={`Theme: ${THEME_LABELS[choice]}. Switch to ${THEME_LABELS[nextTheme]}.`}
+          aria-pressed={screen === 'settings'}
+          onClick={() => setScreen(screen === 'settings' ? 'body' : 'settings')}
         >
-          <DrawnFrame seed="theme" />
-          Theme: {THEME_LABELS[choice]}
+          <DrawnFrame seed="settings" fill={screen === 'settings' ? 'secondary' : undefined} />
+          {screen === 'settings' ? 'Close' : 'Settings'}
         </button>
       </header>
 
@@ -268,8 +265,10 @@ export function App() {
           />
         ) : screen === 'workout' ? (
           <WorkoutScreen exercisesById={exercisesById} onSetDone={rest.start} onBrowse={showExercises} />
-        ) : (
+        ) : screen === 'history' ? (
           <HistoryScreen exercisesById={exercisesById} />
+        ) : (
+          <SettingsScreen theme={choice} onTheme={setChoice} />
         )}
       </div>
 

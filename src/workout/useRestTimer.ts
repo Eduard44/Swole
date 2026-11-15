@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { clampRest, REST_DEFAULT, secondsLeft } from './logic'
+import { setSettings, useSettings } from '../settings/settings'
+import { clampRest, secondsLeft } from './logic'
 
-const LENGTH_KEY = 'swole.restLength'
 const ENDS_KEY = 'swole.restEndsAt'
 
 const read = (key: string): number | null => {
@@ -58,7 +58,7 @@ export type RestTimer = {
  * while the screen is off or the app is in the background.
  */
 export function useRestTimer(): RestTimer {
-  const [length, setLength] = useState(() => clampRest(read(LENGTH_KEY) ?? REST_DEFAULT))
+  const length = useSettings().restLength
   const [endsAt, setEndsAt] = useState<number | null>(() => {
     const saved = read(ENDS_KEY)
     return saved && saved > Date.now() ? saved : null
@@ -111,11 +111,7 @@ export function useRestTimer(): RestTimer {
 
   const adjust = useCallback(
     (seconds: number) => {
-      setLength((current) => {
-        const next = clampRest(current + seconds)
-        write(LENGTH_KEY, next)
-        return next
-      })
+      setSettings({ restLength: clampRest(length + seconds) })
       if (endsAt !== null) {
         const t = Date.now()
         const next = Math.max(t + 1000, endsAt + seconds * 1000)
@@ -124,7 +120,7 @@ export function useRestTimer(): RestTimer {
         write(ENDS_KEY, next)
       }
     },
-    [endsAt],
+    [endsAt, length],
   )
 
   const skip = useCallback(() => {

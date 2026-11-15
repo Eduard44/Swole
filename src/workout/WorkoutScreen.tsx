@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react'
 import type { SessionExercise, WorkoutSet } from '../db/db'
 import { DrawnFrame } from '../drawn/Drawn'
 import type { Exercise } from '../exercises/library'
+import { useSettings } from '../settings/settings'
+import { fromDisplay, toDisplay, type Units } from '../settings/units'
 import { describeSets, duration, formatNumber, openSets, parseNumber } from './logic'
 import {
   activeSession,
@@ -31,6 +33,7 @@ export function WorkoutScreen({ exercisesById, onSetDone, onBrowse }: Props) {
     () => Promise.all(entries.map((e) => lastTime(e.exerciseId))),
     [entries.map((e) => e.exerciseId).join()],
   )
+  const { units } = useSettings()
   const [confirm, setConfirm] = useState<'finish' | 'discard' | null>(null)
   const [now, setNow] = useState(() => Date.now())
 
@@ -79,6 +82,7 @@ export function WorkoutScreen({ exercisesById, onSetDone, onBrowse }: Props) {
             entry={entry}
             name={nameOf(entry.exerciseId)}
             last={history?.[i]?.sets ?? null}
+            units={units}
             onSetDone={onSetDone}
           />
         ))}
@@ -157,10 +161,11 @@ type CardProps = {
   entry: SessionExercise
   name: string
   last: WorkoutSet[] | null
+  units: Units
   onSetDone: () => void
 }
 
-function ExerciseCard({ entry, name, last, onSetDone }: CardProps) {
+function ExerciseCard({ entry, name, last, units, onSetDone }: CardProps) {
   const [editing, setEditing] = useState(false)
   return (
     <section className="exercise-card drawn" aria-label={name}>
@@ -171,12 +176,12 @@ function ExerciseCard({ entry, name, last, onSetDone }: CardProps) {
           {editing ? 'Done' : 'Edit'}
         </button>
       </div>
-      <p className="last-time">{last ? `Last time: ${describeSets(last)}` : 'First time logging this'}</p>
+      <p className="last-time">{last ? `Last time: ${describeSets(last, units)}${units === 'lb' ? ' lb' : ''}` : 'First time logging this'}</p>
 
       <div className="sets" role="table" aria-label={`${name} sets`}>
         <div className="set-row set-labels" role="row">
           <span role="columnheader">Set</span>
-          <span role="columnheader">kg</span>
+          <span role="columnheader">{units}</span>
           <span role="columnheader">Reps</span>
           <span role="columnheader" className="visually-hidden">
             {editing ? 'Remove' : 'Done'}
@@ -187,6 +192,7 @@ function ExerciseCard({ entry, name, last, onSetDone }: CardProps) {
             key={i}
             index={i}
             set={set}
+            units={units}
             editing={editing}
             onChange={(change) => void updateSet(entry.id, i, change)}
             onTick={() => {
@@ -217,6 +223,7 @@ function ExerciseCard({ entry, name, last, onSetDone }: CardProps) {
 type RowProps = {
   index: number
   set: WorkoutSet
+  units: Units
   editing: boolean
   onChange: (change: Partial<WorkoutSet>) => void
   onTick: () => void
@@ -264,14 +271,19 @@ function NumberBox({
   )
 }
 
-function SetRow({ index, set, editing, onChange, onTick, onRemove }: RowProps) {
+function SetRow({ index, set, units, editing, onChange, onTick, onRemove }: RowProps) {
   return (
     <div className={set.done ? 'set-row is-done' : 'set-row'} role="row">
       <span className="set-number" role="cell">
         {index + 1}
       </span>
       <span role="cell">
-        <NumberBox value={set.weight} label={`Set ${index + 1} weight in kg`} decimal onValue={(weight) => onChange({ weight })} />
+        <NumberBox
+          value={toDisplay(set.weight, units)}
+          label={`Set ${index + 1} weight in ${units}`}
+          decimal
+          onValue={(weight) => onChange({ weight: fromDisplay(weight, units) })}
+        />
       </span>
       <span role="cell">
         <NumberBox value={set.reps} label={`Set ${index + 1} reps`} decimal={false} onValue={(reps) => onChange({ reps })} />
