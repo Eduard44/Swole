@@ -863,3 +863,72 @@
   font-weight: 750;
   font-variant-numeric: tabular-nums;
 }
+
+/* Settings */
+.settings {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.settings-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: 6px 8px var(--space-5);
+  margin: 0 -8px;
+}
+
+.setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  min-height: 56px;
+}
+
+.setting-label {
+  font-weight: 650;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.stepper-value {
+  min-width: 3.2em;
+  text-align: center;
+  font-size: var(--text-lg);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.settings-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1.5px dashed var(--text-muted);
+}
+
+.settings-message {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.about {
+  padding-top: var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.topbar .btn[aria-pressed='true'] {
+  color: var(--on-secondary);
+}

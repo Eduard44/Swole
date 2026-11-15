@@ -1,4 +1,5 @@
 import type { WorkoutSet } from '../db/db'
+import { toDisplay, type Units } from '../settings/units'
 
 /**
  * The plain rules behind workout logging, kept apart from storage and screens
@@ -20,14 +21,19 @@ export function formatNumber(value: number | null): string {
 }
 
 /** "80 × 8": one set, for the "last time" line. Sets with no reps are left out. */
-export function describeSet(set: WorkoutSet): string | null {
+export function describeSet(set: WorkoutSet, units: Units = 'kg'): string | null {
   if (set.reps === null) return null
-  return set.weight === null || set.weight === 0 ? `${set.reps} reps` : `${formatNumber(set.weight)} × ${set.reps}`
+  return set.weight === null || set.weight === 0
+    ? `${set.reps} reps`
+    : `${formatNumber(toDisplay(set.weight, units))} × ${set.reps}`
 }
 
 /** "80 × 8, 80 × 8, 75 × 7" */
-export function describeSets(sets: readonly WorkoutSet[]): string {
-  return sets.map(describeSet).filter(Boolean).join(', ')
+export function describeSets(sets: readonly WorkoutSet[], units: Units = 'kg'): string {
+  return sets
+    .map((set) => describeSet(set, units))
+    .filter(Boolean)
+    .join(', ')
 }
 
 /**

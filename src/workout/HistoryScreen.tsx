@@ -3,6 +3,8 @@ import { useState } from 'react'
 import { muscleName, type MuscleId } from '../bodymap/muscles'
 import { DrawnFrame } from '../drawn/Drawn'
 import type { Exercise } from '../exercises/library'
+import { useSettings } from '../settings/settings'
+import type { Units } from '../settings/units'
 import { dayLabel, describeSet, duration, totalsText } from './logic'
 import { deleteWorkout, pastWorkouts, type PastWorkout } from './store'
 
@@ -13,6 +15,7 @@ const timeOf = (at: number) => new Date(at).toLocaleTimeString([], { hour: '2-di
 /** Past workouts, newest first. Tap one to see what was done. */
 export function HistoryScreen({ exercisesById }: Props) {
   const workouts = useLiveQuery(() => pastWorkouts(), [])
+  const { units } = useSettings()
   const [openId, setOpenId] = useState<number | null>(null)
   const now = Date.now()
 
@@ -65,6 +68,7 @@ export function HistoryScreen({ exercisesById }: Props) {
           workout={open}
           title={dayLabel(open.session.startedAt, now)}
           nameOf={nameOf}
+          units={units}
           onClose={() => setOpenId(null)}
         />
       )}
@@ -76,10 +80,11 @@ type DetailProps = {
   workout: PastWorkout
   title: string
   nameOf: (exerciseId: string) => string
+  units: Units
   onClose: () => void
 }
 
-function PastWorkoutDetail({ workout, title, nameOf, onClose }: DetailProps) {
+function PastWorkoutDetail({ workout, title, nameOf, units, onClose }: DetailProps) {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const { session, entries } = workout
   return (
@@ -103,7 +108,8 @@ function PastWorkoutDetail({ workout, title, nameOf, onClose }: DetailProps) {
             {entry.sets.map((set, i) => (
               <li key={i}>
                 <span className="set-number">{i + 1}</span>
-                <span className="past-set">{describeSet(set) ?? '–'}</span>
+                <span className="past-set">{describeSet(set, units) ?? '–'}
+                  {units === 'lb' && set.weight ? ' lb' : ''}</span>
               </li>
             ))}
           </ol>
