@@ -747,6 +747,7 @@
 
 /* The rest timer bar, above the tabs on every screen */
 .restbar {
+  position: relative;
   flex: none;
   display: flex;
   align-items: center;
@@ -931,4 +932,47 @@
 
 .topbar .btn[aria-pressed='true'] {
   color: var(--on-secondary);
+}
+
+/* A pencil line under the rest timer that shortens as the rest runs out. */
+.rest-progress {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 3px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform-origin: left center;
+  transition: transform 260ms linear;
+}
+
+/* Shown once after a workout is finished. */
+.workout-saved {
+  margin: 6px;
+  padding: var(--space-4);
+  color: var(--on-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  animation: screen-in var(--duration-slow) var(--ease-out);
+}
+
+.workout-saved .btn {
+  align-self: flex-start;
+  padding: 0;
+  color: var(--on-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Pencil boxes ease in when they appear (a chosen tab, a ticked set). */
+.drawn-frame {
+  animation: fade-in var(--duration-fast) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rest-progress {
+    transition: none;
+  }
 }

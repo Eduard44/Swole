@@ -9,9 +9,12 @@ The build order. One step at a time, each one checkable on the live link.
 - [x] 5. History
 - [x] 6. Recovery rules and "what to train today"
 - [x] 7. Settings, backup, PWA install and offline check
-- [ ] 8. Polish pass on motion and details
+- [ ] 8. Polish pass on motion and details (first pass done; the rest waits on the owner, see below)
 
 ## Waiting on the owner
 
-- Feedback on the figures: muscle shapes, proportions, the female figure.
+- Figures: refine the muscle shapes from the owner's references, and draw a proper female figure.
+- Light theme: the owner wants another look at it.
+- Motion: direction for screen changes, the tick and the zoom.
 - Exercise images. The dataset's photos total about 105 MB, too much to ship inside a phone app, and loading them from the internet would break "no network calls". Options: no images, a small hand-picked set, or Swole's own pencil sketches for common exercises.
+- A check on a real phone: adding to the home screen, the backup file picker, and the rest timer's beep and vibration.

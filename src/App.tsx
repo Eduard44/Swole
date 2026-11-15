@@ -264,7 +264,12 @@ export function App() {
             onOpenWorkout={() => setScreen('workout')}
           />
         ) : screen === 'workout' ? (
-          <WorkoutScreen exercisesById={exercisesById} onSetDone={rest.start} onBrowse={showExercises} />
+          <WorkoutScreen
+            exercisesById={exercisesById}
+            onSetDone={rest.start}
+            onBrowse={showExercises}
+            onHistory={() => setScreen('history')}
+          />
         ) : screen === 'history' ? (
           <HistoryScreen exercisesById={exercisesById} />
         ) : (

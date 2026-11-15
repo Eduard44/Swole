@@ -4,6 +4,9 @@ export type ResolvedTheme = 'light' | 'dark'
 export const THEME_CHOICES: readonly ThemeChoice[] = ['light', 'dark', 'system']
 export const THEME_STORAGE_KEY = 'swole.theme'
 
+/** The paper color of each theme, for the phone's browser bar. Keep in step with --bg in tokens.css. */
+export const PAPER: Record<ResolvedTheme, string> = { light: '#f6f5f8', dark: '#0d0b14' }
+
 /** Turn whatever was saved into a valid choice. Anything unknown means "system". */
 export function parseThemeChoice(value: unknown): ThemeChoice {
   return value === 'light' || value === 'dark' ? value : 'system'

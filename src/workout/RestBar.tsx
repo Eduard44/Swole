@@ -19,6 +19,7 @@ export function RestBar({ timer }: { timer: RestTimer }) {
   return (
     <div className="restbar drawn" role="timer" aria-label={`Rest, ${clock(timer.left ?? 0)} left`}>
       <DrawnFrame seed="rest" fill="surface" />
+      <span className="rest-progress" style={{ transform: `scaleX(${timer.fraction})` }} aria-hidden="true" />
       <span className="rest-label">Rest</span>
       <span className="rest-clock">{clock(timer.left ?? 0)}</span>
       <div className="rest-actions">

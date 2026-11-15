@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { parseThemeChoice, THEME_STORAGE_KEY, type ThemeChoice } from './theme'
+import { PAPER, parseThemeChoice, THEME_STORAGE_KEY, type ThemeChoice } from './theme'
 
 function readSavedChoice(): ThemeChoice {
   try {
@@ -20,6 +20,11 @@ export function useTheme() {
     const root = document.documentElement
     if (choice === 'system') delete root.dataset.theme
     else root.dataset.theme = choice
+    // The phone's browser bar takes the paper color of the theme in use.
+    document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]').forEach((meta) => {
+      const forDark = meta.media.includes('dark')
+      meta.content = PAPER[choice === 'system' ? (forDark ? 'dark' : 'light') : choice]
+    })
   }, [choice])
 
   const setChoice = useCallback((next: ThemeChoice) => {
